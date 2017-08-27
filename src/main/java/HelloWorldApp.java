@@ -3,9 +3,9 @@
  */
 
 
-import kiwi.KiWiMap;
-
 import java.util.concurrent.atomic.LongAdder;
+import kiwi.KiWiMap;
+//import java.util.concurrent.atomic.LongAdder;
 
 
 class A{
@@ -13,6 +13,7 @@ class A{
     A(Integer t){
         _t = t;
     }
+
     public void foo(){
         kiwi.KiWiMap a = new kiwi.KiWiMap();
         a.put(10, 123);
@@ -42,20 +43,20 @@ class MyThread implements Runnable {
     @Override
     public void run() {
         _adder.add(_x);
-        for(Integer i = 0; i < 123456; ++i){
+        for(Integer i = 0; i < 123456789; ++i){
             if(i == _x){
                 System.out.println(_x);
             }
         }
-        System.out.println(_adder.sum());
+        System.out.format("x=%d, Sum= %d\n", _x,  _adder.sum());
     }
 }
 
 
 class HelloWorldApp {
     public static void main(String[] args) {
-//        A a = new A(15);
-//        a.foo();
+        A a = new A(15);
+        a.foo();
 //        Integer x = 3;
 //        System.out.println("Hello World!"); // Display the string.
         LongAdder adder = new LongAdder();
