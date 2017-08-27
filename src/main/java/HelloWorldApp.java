@@ -43,7 +43,7 @@ class MyThread implements Runnable {
     @Override
     public void run() {
         _adder.add(_x);
-        for(Integer i = 0; i < 123456789; ++i){
+        for(Integer i = 0; i < 1234567; ++i){
             if(i == _x){
                 System.out.println(_x);
             }
