@@ -117,8 +117,10 @@ class History {
 class HistorySimpleRun {
     public static void main(String[] args) {
 
-        ArrayList<Map.Entry<Integer, Integer>> scan1 = new ArrayList<>(Arrays.asList(
-                new AbstractMap.SimpleEntry<>(12, 4), new AbstractMap.SimpleEntry<>(13, 4)));
+        ArrayList<AbstractMap.SimpleImmutableEntry<Integer, Integer>> scan1 =
+                new ArrayList<AbstractMap.SimpleImmutableEntry<Integer, Integer>>(
+                Arrays.asList(
+                new AbstractMap.SimpleImmutableEntry<>(12, 4), new AbstractMap.SimpleImmutableEntry<>(13, 4)));
 
         ArrayList<TimedOperation> h0 = new ArrayList<>(Arrays.asList(
                 new TimedOperation(new Get(12, 3), new Interval(1, 4)),
