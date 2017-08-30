@@ -22,7 +22,7 @@ public class Put implements MapOperation {
     }
 
     @Override
-    public boolean is_const() {
+    public boolean is_const()    {
         return false;
     }
 
