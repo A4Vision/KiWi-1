@@ -14,6 +14,10 @@ class TimedOperation {
         this.interval = interval;
     }
 
-    public static Comparator<TimedOperation> StartTimeComparator
-            = (TimedOperation op1, TimedOperation op2) -> Double.compare(op1.interval.start, op2.interval.start);
+    public static Comparator<TimedOperation> StartTimeComparator = new Comparator<TimedOperation>() {
+        @Override
+        public int compare(TimedOperation o1, TimedOperation o2) {
+            return Double.compare(o1.interval.start, o2.interval.start);
+        }
+    };
 }

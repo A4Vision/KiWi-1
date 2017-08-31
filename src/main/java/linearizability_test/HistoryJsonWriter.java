@@ -117,7 +117,7 @@ class HistoryJsonReader{
             }  catch (IOException e){
                 System.out.println("Error loading");
                 e.printStackTrace();
-                concurrent_history.add(new ArrayList<>());
+                concurrent_history.add(new ArrayList<TimedOperation>());
             }
         }
         return new History(concurrent_history);

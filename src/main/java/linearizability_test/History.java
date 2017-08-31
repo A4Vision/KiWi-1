@@ -8,13 +8,18 @@ import java.util.*;
  * Created by bugabuga on 27/08/17.
  */
 
+
 class History {
     History(ArrayList<ArrayList<TimedOperation>> concurrent_history){
         _history = concurrent_history;
-        Comparator<TimedOperation> byStart =
-                (TimedOperation o1, TimedOperation o2)->new Double(o1.interval.start).compareTo(o2.interval.start);
+        Comparator<TimedOperation> byStart = new Comparator<TimedOperation>() {
+            @Override
+            public int compare(TimedOperation o1, TimedOperation o2) {
+                return new Double(o1.interval.start).compareTo(o2.interval.start);
+            }
+        };
         for(ArrayList<TimedOperation> core_history: concurrent_history){
-            core_history.sort(byStart);
+            Collections.sort(core_history, byStart);
             for(int i = 1; i < core_history.size(); ++i){
                 if(core_history.get(i - 1).interval.end > core_history.get(i).interval.start){
                     throw new IllegalArgumentException("Core " + (new Integer(i)).toString() + " history" +
@@ -66,7 +71,6 @@ class History {
     public boolean is_linearizable(){
         Map<Integer, Integer> map_state = new HashMap<>();
         ArrayList<Integer> indices = new ArrayList<>(Collections.nCopies(n_cores(), 0));
-        System.out.println(indices);
         return _is_linearizable(map_state, indices);
     }
 
@@ -79,8 +83,6 @@ class History {
         for (int i = 0; i < n_cores(); ++i) {
             ArrayList<TimedOperation> ops_list = _history.get(i);
             Integer index = indices.get(i);
-            System.out.println(ops_list.size());
-            System.out.println(ops_list);
             if (index != null && index < ops_list.size()) {
                 first_operations[i] = ops_list.get(index);
                 found_any = true;
@@ -93,10 +95,8 @@ class History {
             // History left to linearize is empty.
             return true;
         }
-        System.out.println(earliest_end_among_first);
         for (int i = 0; i < n_cores(); ++i) {
             TimedOperation timed_op = first_operations[i];
-            System.out.println(timed_op == null);
             if (timed_op == null)
                 continue;
             // Check whether the operation is minimal
@@ -104,8 +104,10 @@ class History {
                 indices.set(i, indices.get(i) + 1);
                 MapOperation op = timed_op.operation;
                 op.operate(map_state);
-                System.out.println("Trying " + op.getClass().toString());
                 if (op.validate() && _is_linearizable(map_state, indices)) {
+                    op.undo(map_state);
+                    System.out.println(op);
+                    System.out.println(map_state.size());
                     return true;
                 } else {
                     op.undo(map_state);

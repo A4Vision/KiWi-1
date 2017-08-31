@@ -23,6 +23,7 @@ abstract public class ConstDeterministicOperation<RetType> implements MapOperati
 
     @Override
     public void undo(Map<Integer, Integer> map) {
+        _actual_retval = null;
     }
 
     @Override

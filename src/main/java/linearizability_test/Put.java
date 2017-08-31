@@ -18,7 +18,7 @@ public class Put implements MapOperation {
 
     @Override
     public void undo(Map<Integer, Integer> map) {
-        map.remove(_value);
+        map.remove(_key);
     }
 
     @Override
