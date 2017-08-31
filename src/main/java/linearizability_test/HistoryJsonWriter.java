@@ -14,21 +14,21 @@ import com.google.gson.stream.JsonReader;
 class SerializableOperationsList{
     SerializableOperationsList(ArrayList<TimedOperation> list){
         get = new ArrayList<>();
-        get_times = new ArrayList<>();
+        getTimes = new ArrayList<>();
         put = new ArrayList<>();
-        put_times  = new ArrayList<>();
+        putTimes = new ArrayList<>();
         discard = new ArrayList<>();
-        discard_times= new ArrayList<>();
+        discardTimes = new ArrayList<>();
         for(TimedOperation timed: list){
             if(timed.operation.getClass() == Get.class){
                 get.add((Get)(timed.operation));
-                get_times.add(timed.interval);
+                getTimes.add(timed.interval);
             } else if(timed.operation.getClass() == Put.class){
                 put.add((Put)(timed.operation));
-                put_times.add(timed.interval);
+                putTimes.add(timed.interval);
             } else if(timed.operation.getClass() == Discard.class){
                 discard.add((Discard)(timed.operation));
-                discard_times.add(timed.interval);
+                discardTimes.add(timed.interval);
             }
         }
     }
@@ -37,24 +37,24 @@ class SerializableOperationsList{
         System.out.format("#get %d #put %d #discard %d", get.size(), put.size(), discard.size());
         ArrayList<TimedOperation> res = new ArrayList<>();
         for(int i = 0; i < get.size(); ++i){
-            res.add(new TimedOperation(get.get(i), get_times.get(i)));
+            res.add(new TimedOperation(get.get(i), getTimes.get(i)));
         }
         for(int i = 0; i < put.size(); ++i){
-            res.add(new TimedOperation(put.get(i), put_times.get(i)));
+            res.add(new TimedOperation(put.get(i), putTimes.get(i)));
         }
         for(int i = 0; i < discard.size(); ++i){
-            res.add(new TimedOperation(discard.get(i), discard_times.get(i)));
+            res.add(new TimedOperation(discard.get(i), discardTimes.get(i)));
         }
         res.sort(TimedOperation.StartTimeComparator);
         return res;
     }
 
     private ArrayList<Get> get;
-    private ArrayList<Interval> get_times;
+    private ArrayList<Interval> getTimes;
     private ArrayList<Put> put;
-    private ArrayList<Interval> put_times;
+    private ArrayList<Interval> putTimes;
     private ArrayList<Discard> discard;
-    private ArrayList<Interval> discard_times;
+    private ArrayList<Interval> discardTimes;
 }
 
 
@@ -64,24 +64,24 @@ class SerializableOperationsList{
  */
 public class HistoryJsonWriter {
     HistoryJsonWriter(String dir, int core){
-        _core = core;
-        _filepath = Paths.get(dir, Integer.toString(core) + ".json");
-        _operations = new ArrayList<>();
-        _dir = dir;
+        this.core = core;
+        filepath = Paths.get(dir, Integer.toString(core) + ".json");
+        operations = new ArrayList<>();
+        directory = dir;
     }
 
     void addOperation(TimedOperation op){
-        _operations.add(op);
+        operations.add(op);
     }
 
     void write() throws IOException{
-        if(!Files.exists(Paths.get(_dir))){
+        if(!Files.exists(Paths.get(directory))){
             System.out.println("creating directory...");
-            Files.createDirectories(Paths.get(_dir));
+            Files.createDirectories(Paths.get(directory));
         }
         Gson gson = new Gson();
-        try(FileWriter file = new FileWriter(_filepath.toString())){
-            SerializableOperationsList obj = new SerializableOperationsList(_operations);
+        try(FileWriter file = new FileWriter(filepath.toString())){
+            SerializableOperationsList obj = new SerializableOperationsList(operations);
             gson.toJson(obj, file);
             System.out.println("Done saving");
         }  catch (IOException e){
@@ -90,24 +90,24 @@ public class HistoryJsonWriter {
         }
     }
 
-    private int _core;
-    private Path _filepath;
-    private String _dir;
-    private ArrayList<TimedOperation> _operations;
+    private int core;
+    private Path filepath;
+    private String directory;
+    private ArrayList<TimedOperation> operations;
 }
 
 
 
 class HistoryJsonReader{
     HistoryJsonReader(String dir, int max_cores){
-        _dir = dir;
-        _max_cores = max_cores;
+        directory = dir;
+        maxCores = max_cores;
     }
 
     History read(){
         ArrayList<ArrayList<TimedOperation>> concurrent_history = new ArrayList<>();
-        for(int i = 0; i < _max_cores; ++i){
-            Path filepath = Paths.get(_dir, Integer.toString(i) + ".json");
+        for(int i = 0; i < maxCores; ++i){
+            Path filepath = Paths.get(directory, Integer.toString(i) + ".json");
             Gson gson = new Gson();
             try(FileReader file = new FileReader(filepath.toFile())){
                 JsonReader reader = new JsonReader(file);
@@ -123,8 +123,8 @@ class HistoryJsonReader{
         return new History(concurrent_history);
     }
 
-    private String _dir;
-    private int _max_cores;
+    private String directory;
+    private int maxCores;
 }
 
 class WriteReadExample {

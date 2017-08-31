@@ -7,28 +7,28 @@ import java.util.Map;
  */
 class Discard implements MapOperation {
     Discard(int key){
-        _key = key;
-        _prev_value = null;
+        this.key = key;
+        prevValue = null;
     }
 
     @Override
     public void operate(Map<Integer, Integer> map) {
-        if(map.containsKey(_key)){
-            _prev_value = map.get(_key);
-            map.remove(_key);
+        if(map.containsKey(key)){
+            prevValue = map.get(key);
+            map.remove(key);
         }
     }
 
     @Override
     public void undo(Map<Integer, Integer> map) {
-        if(_prev_value != null){
-            map.put(_key, _prev_value);
-            _prev_value = null;
+        if(prevValue != null){
+            map.put(key, prevValue);
+            prevValue = null;
         }
     }
 
     @Override
-    public boolean is_const() {
+    public boolean isConst() {
         return false;
     }
 
@@ -37,6 +37,6 @@ class Discard implements MapOperation {
         return true;
     }
 
-    private int _key;
-    private Integer _prev_value;
+    private int key;
+    private Integer prevValue;
 }

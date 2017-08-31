@@ -11,7 +11,7 @@ class Size extends ConstDeterministicOperation<Integer> {
     }
 
     @Override
-    Integer inner_operate(Map<Integer, Integer> map) {
+    Integer innerOperate(Map<Integer, Integer> map) {
         return map.size();
     }
 

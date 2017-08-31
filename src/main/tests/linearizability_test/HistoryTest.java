@@ -43,7 +43,7 @@ public class HistoryTest {
         // As before.
         assertTrue(h.is_linearizable());
         // Last get returns a false value.
-        ((Get)h0.get(3).operation).set_retval(1);
+        ((Get)h0.get(3).operation).setRetval(1);
         assertFalse(h.is_linearizable());
     }
 
@@ -62,7 +62,7 @@ public class HistoryTest {
         History h = new History(new ArrayList<>(Arrays.asList(h0, h1, h2)));
         assertTrue(h.is_linearizable());
         // Scan starts after Put(13, 4)
-        ((Get)h2.get(1).operation).set_retval(0);
+        ((Get)h2.get(1).operation).setRetval(0);
         assertTrue(h.is_linearizable());
         h2.get(1).interval.start = 3.5;
         assertFalse(h.is_linearizable());
@@ -83,9 +83,9 @@ public class HistoryTest {
         History h = new History(new ArrayList<>(Arrays.asList(h0, h1, h2)));
         assertTrue(h.is_linearizable());
         // Scan starts after Put(13, 4)
-        ((Size)h2.get(0).operation).set_retval(1);
+        ((Size)h2.get(0).operation).setRetval(1);
         assertTrue(h.is_linearizable());
-        ((Size)h2.get(0).operation).set_retval(0);
+        ((Size)h2.get(0).operation).setRetval(0);
         h2.get(0).interval.start = 2.1;
         h2.get(0).interval.end = 3.;
         assertFalse(h.is_linearizable());

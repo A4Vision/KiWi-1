@@ -8,13 +8,13 @@ import java.util.Map;
 class Get extends ConstDeterministicOperation<Integer> {
     Get(int key, Integer retval){
         super(retval);
-        _key = key;
+        this.key = key;
     }
 
     @Override
-    public Integer inner_operate(Map<Integer, Integer> map) {
-        return map.getOrDefault(_key, null);
+    public Integer innerOperate(Map<Integer, Integer> map) {
+        return map.getOrDefault(key, null);
     }
 
-    private Integer _key;
+    private Integer key;
 }

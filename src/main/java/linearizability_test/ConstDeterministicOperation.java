@@ -7,43 +7,43 @@ import java.util.Map;
  */
 abstract public class ConstDeterministicOperation<RetType> implements MapOperation {
     ConstDeterministicOperation(RetType retval){
-        _retval = retval;
-        _actual_retval = null;
+        this.retval = retval;
+        actualRetval = null;
     }
 
-    abstract RetType inner_operate(Map<Integer, Integer> map);
+    abstract RetType innerOperate(Map<Integer, Integer> map);
 
     @Override
     public void operate(Map<Integer, Integer> map) {
-        if(_actual_retval != null){
+        if(actualRetval != null){
             throw new UnsupportedOperationException("");
         }
-        _actual_retval = inner_operate(map);
+        actualRetval = innerOperate(map);
     }
 
     @Override
     public void undo(Map<Integer, Integer> map) {
-        _actual_retval = null;
+        actualRetval = null;
     }
 
     @Override
-    public boolean is_const() {
+    public boolean isConst() {
         return true;
     }
 
     @Override
     public boolean validate() {
-        if(_retval == null){
-            return _actual_retval == null;
+        if(retval == null){
+            return actualRetval == null;
         }else {
-            return _retval.equals(_actual_retval);
+            return retval.equals(actualRetval);
         }
     }
 
-    public void set_retval(RetType retval){
-        _retval = retval;
+    public void setRetval(RetType retval){
+        this.retval = retval;
     }
 
-    private RetType _retval;
-    private RetType _actual_retval;
+    private RetType retval;
+    private RetType actualRetval;
 }

@@ -1,7 +1,5 @@
 package linearizability_test;
 
-import javax.management.BadAttributeValueExpException;
-import java.sql.Time;
 import java.util.*;
 
 /**
@@ -11,7 +9,7 @@ import java.util.*;
 
 class History {
     History(ArrayList<ArrayList<TimedOperation>> concurrent_history){
-        _history = concurrent_history;
+        threadsHistories = concurrent_history;
         Comparator<TimedOperation> byStart = new Comparator<TimedOperation>() {
             @Override
             public int compare(TimedOperation o1, TimedOperation o2) {
@@ -33,7 +31,7 @@ class History {
     private ArrayList<Double> _all_times_sorted() {
         HashSet<Double> all_times = new HashSet<>();
 
-        for (ArrayList<TimedOperation> timed_ops_list : _history) {
+        for (ArrayList<TimedOperation> timed_ops_list : threadsHistories) {
             for (TimedOperation timed_op : timed_ops_list) {
                 all_times.add(timed_op.interval.start);
                 all_times.add(timed_op.interval.end);
@@ -65,7 +63,7 @@ class History {
 //            return res
 
     private int n_cores(){
-        return _history.size();
+        return threadsHistories.size();
     }
 
     public boolean is_linearizable(){
@@ -81,7 +79,7 @@ class History {
         boolean found_any = false;
         double earliest_end_among_first = Double.MAX_VALUE;
         for (int i = 0; i < n_cores(); ++i) {
-            ArrayList<TimedOperation> ops_list = _history.get(i);
+            ArrayList<TimedOperation> ops_list = threadsHistories.get(i);
             Integer index = indices.get(i);
             if (index != null && index < ops_list.size()) {
                 first_operations[i] = ops_list.get(index);
@@ -106,8 +104,6 @@ class History {
                 op.operate(map_state);
                 if (op.validate() && _is_linearizable(map_state, indices)) {
                     op.undo(map_state);
-                    System.out.println(op);
-                    System.out.println(map_state.size());
                     return true;
                 } else {
                     op.undo(map_state);
@@ -119,6 +115,6 @@ class History {
         return false;
     }
 
-    private ArrayList<ArrayList<TimedOperation>> _history;
+    private ArrayList<ArrayList<TimedOperation>> threadsHistories;
 }
 

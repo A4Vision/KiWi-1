@@ -7,22 +7,22 @@ import java.util.Map;
  */
 public class Put implements MapOperation {
     Put(int key, int value){
-        _key = key;
-        _value = value;
+        this.key = key;
+        this.value = value;
     }
 
     @Override
     public void operate(Map<Integer, Integer> map) {
-        map.put(_key, _value);
+        map.put(key, value);
     }
 
     @Override
     public void undo(Map<Integer, Integer> map) {
-        map.remove(_key);
+        map.remove(key);
     }
 
     @Override
-    public boolean is_const()    {
+    public boolean isConst()    {
         return false;
     }
 
@@ -31,6 +31,6 @@ public class Put implements MapOperation {
         return true;
     }
 
-    private int _key;
-    private int _value;
+    private int key;
+    private int value;
 }

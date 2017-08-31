@@ -10,7 +10,7 @@ public interface MapOperation {
 
     void undo(Map<Integer, Integer> map);
 
-    boolean is_const();
+    boolean isConst();
 
     boolean validate();
 };
