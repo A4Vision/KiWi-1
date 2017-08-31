@@ -90,4 +90,14 @@ public class HistoryTest {
         h2.get(0).interval.end = 3.;
         assertFalse(h.isLinearizable());
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testValidation(){
+        // Can't use the same operation twice because then undo() might not work properly.
+        Put p = new Put(1, 0);
+        ArrayList<TimedOperation> h0 = new ArrayList<>(Arrays.asList(
+                new TimedOperation(p, new Interval(1, 2)),
+                new TimedOperation(p, new Interval(3, 4))));
+        History h = new History(new ArrayList<>(Collections.singletonList(h0)));
+    }
 }

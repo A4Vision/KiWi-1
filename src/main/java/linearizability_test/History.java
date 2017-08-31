@@ -1,5 +1,8 @@
 package linearizability_test;
 
+import com.sun.org.apache.xpath.internal.functions.FuncFalse;
+
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -25,10 +28,14 @@ class History {
                 }
             }
         }
+
+        if(!validateUniqueObjects()){
+            throw new IllegalArgumentException("Bad histories - usage of same operation twice.");
+        }
     }
 
 
-    private ArrayList<Double> _all_times_sorted() {
+    private ArrayList<Double> allTimesSorted() {
         HashSet<Double> all_times = new HashSet<>();
 
         for (ArrayList<TimedOperation> timed_ops_list : threadsHistories) {
@@ -45,7 +52,7 @@ class History {
 
 
 //    def __str__(self):
-//    times = self._all_times_sorted()
+//    times = self.allTimesSorted()
 //    time2index = {t: i for i, t in enumerate(times)}
 //    LEN = 10
 //    res = ""
@@ -66,7 +73,26 @@ class History {
         return threadsHistories.size();
     }
 
-    public boolean isLinearizable(){
+    /**
+     *
+     * @return True iff each MapOperation object appears at most once.
+     */
+    private boolean validateUniqueObjects(){
+        Set<Object> s = new HashSet<>();
+        int totalCount = 0;
+        for(ArrayList<TimedOperation> operations: threadsHistories){
+            totalCount += operations.size();
+            for(TimedOperation timedOp: operations){
+                s.add(timedOp.operation);
+            }
+        }
+        return s.size() == totalCount;
+    }
+
+    public boolean isLinearizable() throws IllegalArgumentException {
+        if(!validateUniqueObjects()){
+            throw new IllegalArgumentException("Bad histories - usage of same operation twice.");
+        }
         Map<Integer, Integer> map_state = new HashMap<>();
         ArrayList<Integer> indices = new ArrayList<>(Collections.nCopies(n_cores(), 0));
         return recursiveIsLinearizable(map_state, indices);
