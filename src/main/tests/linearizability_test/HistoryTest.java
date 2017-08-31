@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
  */
 public class HistoryTest {
     @Test
-    public void is_linearizable() throws Exception {
+    public void testIsLinearizable() throws Exception {
         ArrayList<AbstractMap.SimpleImmutableEntry<Integer, Integer>> scan1 =
                 new ArrayList<>( Arrays.asList(
                         new AbstractMap.SimpleImmutableEntry<>(12, 4),
@@ -35,16 +35,16 @@ public class HistoryTest {
                 new TimedOperation(new Put(12, 3), new Interval(9.5, 12))));
 
         History h = new History(new ArrayList<>(Arrays.asList(h0, h1)));
-        assertTrue(h.is_linearizable());
+        assertTrue(h.isLinearizable());
         // Scan starts after Put(13, 4)
         h0.get(2).interval = new Interval(7.5, 7.9);
-        assertFalse(h.is_linearizable());
+        assertFalse(h.isLinearizable());
         h0.get(2).interval = new Interval(8.1, 8.7);
         // As before.
-        assertTrue(h.is_linearizable());
+        assertTrue(h.isLinearizable());
         // Last get returns a false value.
         ((Get)h0.get(3).operation).setRetval(1);
-        assertFalse(h.is_linearizable());
+        assertFalse(h.isLinearizable());
     }
 
     @Test
@@ -60,12 +60,12 @@ public class HistoryTest {
                 new TimedOperation(new Get(1, null), new Interval(2.6, 4))));
 
         History h = new History(new ArrayList<>(Arrays.asList(h0, h1, h2)));
-        assertTrue(h.is_linearizable());
+        assertTrue(h.isLinearizable());
         // Scan starts after Put(13, 4)
         ((Get)h2.get(1).operation).setRetval(0);
-        assertTrue(h.is_linearizable());
+        assertTrue(h.isLinearizable());
         h2.get(1).interval.start = 3.5;
-        assertFalse(h.is_linearizable());
+        assertFalse(h.isLinearizable());
     }
 
 
@@ -81,13 +81,13 @@ public class HistoryTest {
                 new TimedOperation(new Size(0), new Interval(1, 1.5))));
 
         History h = new History(new ArrayList<>(Arrays.asList(h0, h1, h2)));
-        assertTrue(h.is_linearizable());
+        assertTrue(h.isLinearizable());
         // Scan starts after Put(13, 4)
         ((Size)h2.get(0).operation).setRetval(1);
-        assertTrue(h.is_linearizable());
+        assertTrue(h.isLinearizable());
         ((Size)h2.get(0).operation).setRetval(0);
         h2.get(0).interval.start = 2.1;
         h2.get(0).interval.end = 3.;
-        assertFalse(h.is_linearizable());
+        assertFalse(h.isLinearizable());
     }
 }

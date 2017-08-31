@@ -143,6 +143,6 @@ class WriteReadExample {
 
         HistoryJsonReader reader = new HistoryJsonReader(dir, 4);
         History history = reader.read();
-        System.out.println(history.is_linearizable());
+        System.out.println(history.isLinearizable());
     }
 }

@@ -66,14 +66,14 @@ class History {
         return threadsHistories.size();
     }
 
-    public boolean is_linearizable(){
+    public boolean isLinearizable(){
         Map<Integer, Integer> map_state = new HashMap<>();
         ArrayList<Integer> indices = new ArrayList<>(Collections.nCopies(n_cores(), 0));
-        return _is_linearizable(map_state, indices);
+        return recursiveIsLinearizable(map_state, indices);
     }
 
     // Recursive !!!
-    private boolean _is_linearizable(Map<Integer, Integer> map_state, ArrayList<Integer> indices) {
+    private boolean recursiveIsLinearizable(Map<Integer, Integer> map_state, ArrayList<Integer> indices) {
         // Wing Gong naive test
         TimedOperation[] first_operations = new TimedOperation[n_cores()];
         boolean found_any = false;
@@ -102,7 +102,7 @@ class History {
                 indices.set(i, indices.get(i) + 1);
                 MapOperation op = timed_op.operation;
                 op.operate(map_state);
-                if (op.validate() && _is_linearizable(map_state, indices)) {
+                if (op.validate() && recursiveIsLinearizable(map_state, indices)) {
                     op.undo(map_state);
                     return true;
                 } else {
