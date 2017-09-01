@@ -5,10 +5,10 @@ import kiwi.KiWiMap;
 import java.util.Map;
 
 /**
- * Created by bugabuga on 27/08/17.
+ * Created by bugabuga on 01/09/17.
  */
-class Size extends ConstDeterministicOperation<Integer> {
-    Size(Integer retval) {
+public class SizeLowerBound extends ConstDeterministicOperation<Integer> {
+    public SizeLowerBound(Integer retval) {
         super(retval);
     }
 
@@ -17,14 +17,18 @@ class Size extends ConstDeterministicOperation<Integer> {
         return map.size();
     }
 
+    @Override
+    public boolean validate() {
+        return retval <= actualRetval;
+    }
 
     @Override
     public void operateKiWi(KiWiMap map) {
-        map.size();
+        retval = map.sizeLowerBound();
     }
 
     @Override
     public boolean weakEqual(MapOperation other) {
-        return other.getClass() == Size.class;
+        return other.getClass() == SizeLowerBound.class;
     }
 }

@@ -1,5 +1,7 @@
 package linearizability_test;
 
+import kiwi.KiWiMap;
+
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Map;
@@ -7,24 +9,37 @@ import java.util.Map;
 /**
  * Created by bugabuga on 27/08/17.
  */
-class Scan extends ConstDeterministicOperation<ArrayList<AbstractMap.SimpleImmutableEntry<Integer, Integer>>> {
-    Scan(double start_key, double end_key, ArrayList<AbstractMap.SimpleImmutableEntry<Integer, Integer>> retval) {
+public class Scan extends ConstDeterministicOperation<ArrayList<Integer>> {
+    public Scan(int start_key, int end_key, ArrayList<Integer> retval) {
         super(retval);
         startKey = start_key;
         endKey = end_key;
     }
 
     @Override
-    ArrayList<AbstractMap.SimpleImmutableEntry<Integer, Integer>> innerOperate(Map<Integer, Integer> map) {
-        ArrayList<AbstractMap.SimpleImmutableEntry<Integer, Integer>> res = new ArrayList<>();
+    ArrayList<Integer> innerOperate(Map<Integer, Integer> map) {
+        ArrayList<Integer> res = new ArrayList<>();
         for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
             if(startKey <= entry.getKey() && entry.getKey() <= endKey)
-                res.add(new AbstractMap.SimpleImmutableEntry<>(
-                        entry.getKey(), entry.getValue()
-                ));
+                res.add(entry.getValue());
         }
         return res;
     }
-    private double startKey;
-    private double endKey;
+    private int startKey;
+    private int endKey;
+
+    @Override
+    public void operateKiWi(KiWiMap map) {
+        Integer[] result = new Integer[1000];
+        int length = map.getRange(result, startKey, endKey);
+        retval = new ArrayList<>();
+        for(int i = 0; i < length; ++i){
+            retval.set(i, result[i]);
+        }
+    }
+
+    @Override
+    public boolean weakEqual(MapOperation other) {
+        return other.getClass() == Scan.class && ((Scan)other).startKey == startKey && ((Scan)other).endKey == endKey;
+    }
 }

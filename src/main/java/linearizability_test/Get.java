@@ -1,12 +1,14 @@
 package linearizability_test;
 
+import kiwi.KiWiMap;
+
 import java.util.Map;
 
 /**
  * Created by bugabuga on 27/08/17.
  */
-class Get extends ConstDeterministicOperation<Integer> {
-    Get(int key, Integer retval){
+public class Get extends ConstDeterministicOperation<Integer> {
+    public Get(int key, Integer retval){
         super(retval);
         this.key = key;
     }
@@ -17,4 +19,14 @@ class Get extends ConstDeterministicOperation<Integer> {
     }
 
     private Integer key;
+
+    @Override
+    public void operateKiWi(KiWiMap map) {
+        retval = map.get(key);
+    }
+
+    @Override
+    public boolean weakEqual(MapOperation other) {
+        return other.getClass() == Get.class && ((Get)other).key == key;
+    }
 }

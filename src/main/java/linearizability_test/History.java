@@ -10,7 +10,7 @@ import java.util.*;
  */
 
 
-class History {
+public class History {
     History(ArrayList<ArrayList<TimedOperation>> concurrent_history){
         threadsHistories = concurrent_history;
         Comparator<TimedOperation> byStart = new Comparator<TimedOperation>() {
@@ -139,6 +139,12 @@ class History {
 
         }
         return false;
+    }
+
+    public ArrayList<ArrayList<TimedOperation>> getHistories(){
+        // TODO: copy the elements here, to pervent the user
+        // changing the return value of the various operations/intervals.
+        return threadsHistories;
     }
 
     private ArrayList<ArrayList<TimedOperation>> threadsHistories;

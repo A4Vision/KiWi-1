@@ -1,12 +1,19 @@
 package linearizability_test;
 
+import kiwi.KiWiMap;
+
 import java.util.Map;
 
 /**
  * Created by bugabuga on 27/08/17.
  */
-class Discard implements MapOperation {
-    Discard(int key){
+public class Discard implements MapOperation {
+    // The key to discard
+    private int key;
+    // The previous value mapped to this key (before the actual delete)
+    private Integer prevValue;
+
+    public Discard(int key){
         this.key = key;
         prevValue = null;
     }
@@ -37,6 +44,15 @@ class Discard implements MapOperation {
         return true;
     }
 
-    private int key;
-    private Integer prevValue;
+    @Override
+    public void operateKiWi(KiWiMap map) {
+        map.remove(key);
+    }
+
+    @Override
+    public boolean weakEqual(MapOperation other) {
+        return other.getClass() == Discard.class && ((Discard)other).key == key;
+    }
+
+
 }

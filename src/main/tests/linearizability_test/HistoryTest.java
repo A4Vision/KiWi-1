@@ -14,15 +14,13 @@ import static org.junit.Assert.*;
 public class HistoryTest {
     @Test
     public void testIsLinearizable() throws Exception {
-        ArrayList<AbstractMap.SimpleImmutableEntry<Integer, Integer>> scan1 =
-                new ArrayList<>( Arrays.asList(
-                        new AbstractMap.SimpleImmutableEntry<>(12, 4),
-                        new AbstractMap.SimpleImmutableEntry<>(13, 4)));
+        ArrayList<Integer> scan1 =
+                new ArrayList<>( Arrays.asList(4, 4));
 
         ArrayList<TimedOperation> h0 = new ArrayList<>(Arrays.asList(
                 new TimedOperation(new Get(12, 3), new Interval(1, 4)),
                 new TimedOperation(new Get(12, 4), new Interval(5, 7)),
-                new TimedOperation(new Scan(11.2, 20, scan1), new Interval(8.1, 8.7)),
+                new TimedOperation(new Scan(12, 20, scan1), new Interval(8.1, 8.7)),
                 new TimedOperation(new Get(12, 3), new Interval(8.8, 10))));
 
 

@@ -5,9 +5,18 @@ import java.util.Comparator;
 /**
  * Created by bugabuga on 27/08/17.
  */
-class TimedOperation {
-    MapOperation operation;
+public class TimedOperation {
+    public MapOperation operation;
     Interval interval;
+
+    public TimedOperation(MapOperation operation) {
+        this.operation = operation;
+        interval = new Interval();
+    }
+
+    public void setEnd(){
+        interval.setEnd();
+    }
 
     TimedOperation(MapOperation operation, Interval interval) {
         this.operation = operation;

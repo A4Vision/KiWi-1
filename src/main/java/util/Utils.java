@@ -17,6 +17,8 @@
 
 package util;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 /**
@@ -112,5 +114,11 @@ public class Utils
 	    //hashval = hashval ^ octet;
 	 }
 	 return Math.abs(hashval);
+      }
+
+      public static ArrayList<Integer> convertArrayToList(Integer[] array){
+          ArrayList<Integer> intList = new ArrayList<Integer>();
+          Collections.addAll(intList, array);
+          return intList;
       }
 }

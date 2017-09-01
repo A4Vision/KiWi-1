@@ -520,6 +520,11 @@ public class KiWi<K extends Comparable<? super K>, V> implements ChunkIterator<K
 		lastChild.next.compareAndSet(null, nextToLast, false, false);
 	}
 
+	public static int threadId(){
+		return (int) (Thread.currentThread().getId() % MAX_THREADS);
+	}
+
+
 	/** publish data into thread array - use null to clear **/
 	private void publishScan(ScanData data)
 	{

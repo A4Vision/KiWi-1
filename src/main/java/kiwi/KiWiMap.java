@@ -1,10 +1,11 @@
 package kiwi;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 
+import linearizability_test.*;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import util.Utils;
 
 /**
  * Created by msulamy on 7/27/15.
@@ -18,13 +19,23 @@ public class KiWiMap implements CompositionalMap<Integer,Integer>
     public static int               RebalanceSize = 2;
 
 	public KiWi<Integer,Integer>	kiwi;
-    
+	private HistoryLogger historyLogger;
+
     /***************	Constructors		***************/
-    public KiWiMap()
+    public KiWiMap(){
+        this(false);
+    }
+
+    public KiWiMap(boolean logOperations)
     {
     	ChunkInt.initPool();
         KiWi.RebalanceSize = RebalanceSize;
     	this.kiwi = new KiWi<>(new ChunkInt(), SupportScan);
+    	if(logOperations) {
+            historyLogger = new HistoryLogger();
+        }else{
+    	    historyLogger = null;
+        }
     }
     
     /***************	Methods				***************/
@@ -33,6 +44,7 @@ public class KiWiMap implements CompositionalMap<Integer,Integer>
     @Override
     public Integer putIfAbsent(Integer k, Integer v)
     {
+
     	kiwi.put(k, v);
         return null;	// can implement return value but not necessary
     }
@@ -54,13 +66,27 @@ public class KiWiMap implements CompositionalMap<Integer,Integer>
     @Override
     public Integer get(Object o)
     {
-    	return kiwi.get((Integer)o);
+
+        Get get = new Get((Integer)o, null);
+        TimedOperation timedOperation = new TimedOperation(get);
+        Integer res = kiwi.get((Integer)o);
+        timedOperation.setEnd();
+        get.setRetval(res);
+        historyLogger.logOperation(timedOperation);
+        return res;
     }
 
     @Override
     public Integer put(Integer k, Integer v)
     {
-    	kiwi.put(k, v);
+        if(historyLogger != null) {
+            TimedOperation timedOperation = new TimedOperation(new Put(k, v));
+            kiwi.put(k, v);
+            timedOperation.setEnd();
+            historyLogger.logOperation(timedOperation);
+        }else{
+            kiwi.put(k, v);
+        }
         return null;
     }
 
@@ -68,14 +94,31 @@ public class KiWiMap implements CompositionalMap<Integer,Integer>
     @Override
     public Integer remove(Object o)
     {
-    	kiwi.put((Integer)o, null);
+        if(historyLogger != null) {
+            TimedOperation timedOperation = new TimedOperation(new Discard((Integer)o));
+            kiwi.put((Integer)o, null);
+            timedOperation.setEnd();
+            historyLogger.logOperation(timedOperation);
+        }else{
+            kiwi.put((Integer)o, null);
+        }
         return null;
     }
 
     @Override
     public int getRange(Integer[] result, Integer min, Integer max)
     {
-        return kiwi.scan(result,min,max);
+        if(historyLogger != null){
+            Scan scan = new Scan(min, max, null);
+            TimedOperation timedOperation = new TimedOperation(scan);
+            int res = kiwi.scan(result,min,max);
+            timedOperation.setEnd();
+            scan.setRetval(Utils.convertArrayToList(result));
+            historyLogger.logOperation(timedOperation);
+            return res;
+        }else{
+            return kiwi.scan(result,min,max);
+        }
 /*
     	Iterator<Integer> iter = kiwi.scan(min, max);
     	int i;
@@ -167,4 +210,41 @@ public class KiWiMap implements CompositionalMap<Integer,Integer>
     {
         kiwi.calcChunkStatistics();
     }
+
+    /** Upper bound size */
+    public int sizeUpperBound()
+    {
+        if(historyLogger != null) {
+            SizeUpperBound bound = new SizeUpperBound(null);
+            TimedOperation timedOperation = new TimedOperation(bound);
+            int res = Integer.MAX_VALUE;
+            timedOperation.setEnd();
+            bound.setRetval(res);
+            historyLogger.logOperation(timedOperation);
+            return res;
+        }else{
+            return Integer.MAX_VALUE;
+        }
+    }
+
+    /** Upper bound size */
+    public int sizeLowerBound()
+    {
+        if(historyLogger != null) {
+            SizeLowerBound bound = new SizeLowerBound(null);
+            TimedOperation timedOperation = new TimedOperation(bound);
+            int res = 0;
+            timedOperation.setEnd();
+            bound.setRetval(res);
+            historyLogger.logOperation(timedOperation);
+            return res;
+        }else{
+            return 0;
+        }
+    }
+
+    public void write(String dir) throws IOException{
+        historyLogger.write(dir);
+    }
 }
+

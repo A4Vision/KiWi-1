@@ -44,6 +44,6 @@ abstract public class ConstDeterministicOperation<RetType> implements MapOperati
         this.retval = retval;
     }
 
-    private RetType retval;
-    private RetType actualRetval;
+    RetType retval;
+    RetType actualRetval;
 }

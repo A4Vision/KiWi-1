@@ -1,5 +1,7 @@
 package linearizability_test;
 
+import kiwi.KiWiMap;
+
 import java.util.Map;
 
 /**
@@ -13,4 +15,8 @@ public interface MapOperation {
     boolean isConst();
 
     boolean validate();
+
+    void operateKiWi(KiWiMap map);
+
+    boolean weakEqual(MapOperation other);
 };
