@@ -56,14 +56,14 @@ public class RebalancerTest {
     public void resetState(int numOfItems, int numOfChunks)
     {
         chunks = new ArrayList<>(numOfChunks);
-        Chunk<Integer, Integer> prev = new ChunkInt(0,null);
+        Chunk<Integer, Integer> prev = new ChunkInt(0, null, false);
         fillChunk(prev,numOfItems);
 
         chunks.add(prev);
 
         for(int i = 1; i < numOfChunks; ++i)
         {
-            Chunk<Integer, Integer> c = new ChunkInt(i*10,null);
+            Chunk<Integer, Integer> c = new ChunkInt(i*10, null, false);
 
             fillChunk(c,numOfItems);
 

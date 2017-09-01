@@ -35,14 +35,14 @@ public class ItemsIteratorsTests {
     public void resetState(int numOfItems, int numOfChunks)
     {
         chunks = new ArrayList<>(numOfChunks);
-        Chunk<Integer, Integer> prev = new ChunkInt(0,null);
+        Chunk<Integer, Integer> prev = new ChunkInt(0,null, false);
         fillChunk(prev,numOfItems);
 
         chunks.add(prev);
 
         for(int i = 1; i < numOfChunks; ++i)
         {
-            Chunk<Integer, Integer> c = new ChunkInt(i*10,null);
+            Chunk<Integer, Integer> c = new ChunkInt(i*10,null, false);
 
             fillChunk(c,numOfItems);
 
@@ -153,7 +153,7 @@ public class ItemsIteratorsTests {
     @Test
     public void emptyIteratorTest() throws Exception
     {
-        Chunk<Integer, Integer> chunk = new ChunkInt(0,null);
+        Chunk<Integer, Integer> chunk = new ChunkInt(0,null, false);
         Chunk<Integer, Integer>.ItemsIterator iter = chunk.itemsIterator();
 
         assertFalse(iter.hasNext());

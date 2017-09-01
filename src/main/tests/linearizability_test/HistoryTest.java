@@ -98,4 +98,16 @@ public class HistoryTest {
                 new TimedOperation(p, new Interval(3, 4))));
         History h = new History(new ArrayList<>(Collections.singletonList(h0)));
     }
+
+    @Test
+    public void testGetInsidePut(){
+        ArrayList<TimedOperation> h0 = new ArrayList<>(Arrays.asList(
+                new TimedOperation(new Put(0, 1), new Interval(0, 1)),
+                new TimedOperation(new Put(0, 2), new Interval(2, 5))));
+        ArrayList<TimedOperation> h1 = new ArrayList<>(Collections.singletonList(
+                new TimedOperation(new Get(0, 1), new Interval(3, 4))));
+        History h = new History(new ArrayList<>(Arrays.asList(h0, h1)));
+        System.out.println(h);
+        assertTrue(h.isLinearizable());
+    }
 }

@@ -8,6 +8,10 @@ import java.util.Map;
  * Created by bugabuga on 27/08/17.
  */
 public class Put implements MapOperation {
+    private int key;
+    private int value;
+    private Integer prevValue;
+
     public Put(int key, int value){
         this.key = key;
         this.value = value;
@@ -15,12 +19,16 @@ public class Put implements MapOperation {
 
     @Override
     public void operate(Map<Integer, Integer> map) {
+        prevValue = map.getOrDefault(key, null);
         map.put(key, value);
     }
 
     @Override
     public void undo(Map<Integer, Integer> map) {
         map.remove(key);
+        if(prevValue != null){
+            map.put(key, prevValue);
+        }
     }
 
     @Override
@@ -43,6 +51,8 @@ public class Put implements MapOperation {
         return other.getClass() == Put.class && ((Put)other).key == key && ((Put)other).value == value;
     }
 
-    private int key;
-    private int value;
+    @Override
+    public String toString() {
+        return String.format("P(%d,%d)", key, value);
+    }
 }

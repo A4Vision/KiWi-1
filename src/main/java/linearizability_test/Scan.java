@@ -1,10 +1,9 @@
 package linearizability_test;
 
 import kiwi.KiWiMap;
+import util.Utils;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by bugabuga on 27/08/17.
@@ -19,9 +18,12 @@ public class Scan extends ConstDeterministicOperation<ArrayList<Integer>> {
     @Override
     ArrayList<Integer> innerOperate(Map<Integer, Integer> map) {
         ArrayList<Integer> res = new ArrayList<>();
-        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
-            if(startKey <= entry.getKey() && entry.getKey() <= endKey)
-                res.add(entry.getValue());
+        TreeSet<Integer> sortedSet = new TreeSet<>();
+        sortedSet.addAll(map.keySet());
+        // Iterate over the keys, sorted.
+        for (Integer key : sortedSet) {
+            if(startKey <= key && key <= endKey)
+                res.add(map.get(key));
         }
         return res;
     }
@@ -32,10 +34,12 @@ public class Scan extends ConstDeterministicOperation<ArrayList<Integer>> {
     public void operateKiWi(KiWiMap map) {
         Integer[] result = new Integer[1000];
         int length = map.getRange(result, startKey, endKey);
-        retval = new ArrayList<>();
-        for(int i = 0; i < length; ++i){
-            retval.set(i, result[i]);
-        }
+        retval = Utils.convertArrayToList(result, length);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("S%d,%d->%s", startKey, endKey, retval);
     }
 
     @Override

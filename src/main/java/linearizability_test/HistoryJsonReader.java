@@ -15,21 +15,15 @@ public class HistoryJsonReader{
         maxCores = max_cores;
     }
 
-    public History read(){
+    public History read() throws IOException{
         ArrayList<ArrayList<TimedOperation>> concurrent_history = new ArrayList<>();
         for(int i = 0; i < maxCores; ++i){
             Path filepath = Paths.get(directory, Integer.toString(i) + ".json");
             Gson gson = new Gson();
-            try(FileReader file = new FileReader(filepath.toFile())){
-                JsonReader reader = new JsonReader(file);
-                SerializableOperationsList obj = gson.fromJson(reader, SerializableOperationsList.class);
-                concurrent_history.add(obj.getSortedList());
-                System.out.println("Done loading");
-            }  catch (IOException e){
-                System.out.println("Error loading");
-                e.printStackTrace();
-                concurrent_history.add(new ArrayList<TimedOperation>());
-            }
+            FileReader file = new FileReader(filepath.toFile());
+            JsonReader reader = new JsonReader(file);
+            SerializableOperationsList obj = gson.fromJson(reader, SerializableOperationsList.class);
+            concurrent_history.add(obj.getSortedList());
         }
         return new History(concurrent_history);
     }

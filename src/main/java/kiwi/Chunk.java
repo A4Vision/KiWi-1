@@ -43,7 +43,9 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
 	protected final Object[]							dataArray;
 
 	private final AtomicInteger					orderIndex;	// points to next free index of order array
-	private final AtomicInteger					dataIndex;	// points to next free index of data array 
+	private final AtomicInteger					dataIndex;	// points to next free index of data array
+	protected final boolean delayForLinearizabilityTesting; // Whether to delay in some critical locations
+																 // to uncover linearizablity bugs.
 
 	public K									minKey;		// minimal key that can be put in this chunk
 
@@ -274,7 +276,12 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
 		}
 	}
 
-	/***
+	public abstract void printLinkedList();
+
+    public abstract void printData(int orderIndex);
+
+
+    /***
 	 * The class contains approximate information about chunk utilization.
 	 */
 	public class Statistics
@@ -324,7 +331,7 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
 	 * @param minKey	minimal key to be placed in chunk, used by KiWi
 	 * @param dataItemSize	expected avg. size (in BYTES!) of items in data-array. can be an estimate
 	 */
-	public Chunk(K minKey, int dataItemSize, Chunk<K,V> creator)
+	public Chunk(K minKey, int dataItemSize, Chunk<K,V> creator, boolean delayForLinearizabilityTesting)
 	{
 
 		// allocate space for head item (only "next", starts pointing to NONE==0)
@@ -348,6 +355,7 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
 		this.rebalancer = new AtomicReference<Rebalancer<K,V>>(null); // to be updated on rebalance
 		this.statistics = new Statistics();
 
+		this.delayForLinearizabilityTesting = delayForLinearizabilityTesting;
 		// TODO allocate space for minKey inside chunk (pointed by skiplist)?
 	}
 	
@@ -754,8 +762,12 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
 			
 			// if item's key is larger - we've exceeded our key
 			// it's not in chunk - no need to search further
-			if (cmp > 0)
-				return null;
+			if (cmp > 0){
+			    if(item != null && get(item.orderIndex, OFFSET_KEY) == (Integer)key){
+			        return getData(item.orderIndex);
+                }
+                return null;
+            }
 			// if keys are equal - we've found the item
 			else if (cmp == 0)
 				return chooseNewer(curr, item);
@@ -763,7 +775,9 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
 			else
 				curr = get(curr, OFFSET_NEXT);
 		}
-		
+        if(item != null && get(item.orderIndex, OFFSET_KEY) == (Integer)key){
+            return getData(item.orderIndex);
+        }
 		return null;
 	}
 	
@@ -785,9 +799,17 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
 			return getData(item);
 		else if (dataVer > itemVer)
 			return getData(pd.orderIndex);
-		else
-			// same version - return latest item by order in order-array
-			return getData(Math.max(item, pd.orderIndex));
+		else {
+            // same version - return latest item by order in order-array
+            // Correction - return latest item by order in data array.
+            int d1 = get(item, OFFSET_DATA);
+            int d2 = get(pd.orderIndex, OFFSET_DATA);
+            if(Math.abs(d1) > Math.abs(d2)){
+                return getData(item);
+            }else{
+                return getData(pd.orderIndex);
+            }
+        }
 	}
 	
 	/** add the given item (allocated in this chunk) to the chunk's linked list
@@ -824,8 +846,10 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
 					break;
 				
 				// if found item we're trying to insert - already inserted by someone else, so we're done
-				if (curr == orderIndex)
-					return;
+				if (curr == orderIndex) {
+//                    System.out.format("addToList: found item tid=%d\n", KiWi.threadId());
+                    return;
+                }
 					//TODO also update version to positive?
 				
 				// compare current item's key to ours
@@ -855,10 +879,15 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
 					{
 						int newDataIdx = get(orderIndex, OFFSET_DATA);
 						int oldDataIdx = get(curr, OFFSET_DATA);
+//                        System.out.format("newDataIdx=%d, oldDataIdx=%d\n", newDataIdx, oldDataIdx);
 
 						while((Math.abs(newDataIdx) > Math.abs(oldDataIdx)) && !cas(curr,OFFSET_DATA,oldDataIdx, newDataIdx)) {
 							oldDataIdx = get(curr,OFFSET_DATA);
 						}
+//                        System.out.println("ending addToList by overwrite");
+//                        printData(orderIndex);
+//                        System.out.format("newDataIdx=%d, oldDataIdx=%d\n", newDataIdx, oldDataIdx);
+//                        printLinkedList();
 
 						return;
 					}
@@ -894,9 +923,14 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
 					}
 
 					break;
+				}else{
+//					System.out.println("cas set pointer to me failed");
+//					System.out.println(get(orderIndex, OFFSET_VERSION));
 				}
 			}
 		}
+//		System.out.format("addToList idx=%d tid=%d\n", orderIndex, KiWi.threadId());
+//        printLinkedList();
 	}
 
 	private boolean casData(int curr, Object currData, Object data) {
@@ -1144,6 +1178,9 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
 
 		// increment data array to get new index in it
 		int di = dataIndex.getAndIncrement();
+		// Assaf: My change - orderIndex and dataIndex should be the same, so entries may be ordered
+        //        by dataIndex.
+		di = oi / ORDER_SIZE;
 		if (di >= dataArray.length)
 			return -1;
 
@@ -1154,7 +1191,6 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
 		di = dataSize > 0? di : -di;
 
 		set(oi, OFFSET_DATA, di);
-
 		// return index of allocated order-array item
 		return oi;
 	}

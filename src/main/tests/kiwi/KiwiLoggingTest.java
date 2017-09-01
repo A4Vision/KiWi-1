@@ -2,6 +2,7 @@ package kiwi;
 
 import linearizability_test.*;
 import org.junit.Test;
+import util.Utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,30 +12,13 @@ import java.util.Random;
 import static org.junit.Assert.*;
 
 
-class ThreadOperateOnMap implements Runnable {
-    private KiWiMap map;
-    private ArrayList<MapOperation> ops;
-
-    ThreadOperateOnMap(KiWiMap map, ArrayList<MapOperation> ops) {
-        this.ops = ops;
-        this.map = map;
-    }
-
-    @Override
-    public void run() {
-        for(MapOperation op: ops){
-            op.operateKiWi(map);
-        }
-    }
-}
-
 /**
  * Created by bugabuga on 01/09/17.
  */
 public class KiwiLoggingTest {
     @Test
     public void loggingOfKiwiMap() throws IOException, InterruptedException {
-        String tempFolder = "/tmp/history_" + Long.toString(System.currentTimeMillis());
+        String tempFolder = Utils.tempFolder();
         KiWiMap map = new KiWiMap(true);
         ArrayList<ArrayList<MapOperation>> mapOperations = new ArrayList<>();
         mapOperations.add(new ArrayList<>(Arrays.asList(

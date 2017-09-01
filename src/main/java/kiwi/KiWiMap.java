@@ -28,9 +28,9 @@ public class KiWiMap implements CompositionalMap<Integer,Integer>
 
     public KiWiMap(boolean logOperations)
     {
-    	ChunkInt.initPool();
+    	ChunkInt.initPool(logOperations);
         KiWi.RebalanceSize = RebalanceSize;
-    	this.kiwi = new KiWi<>(new ChunkInt(), SupportScan);
+    	this.kiwi = new KiWi<>(new ChunkInt(logOperations), SupportScan);
     	if(logOperations) {
             historyLogger = new HistoryLogger();
         }else{
@@ -45,7 +45,7 @@ public class KiWiMap implements CompositionalMap<Integer,Integer>
     public Integer putIfAbsent(Integer k, Integer v)
     {
 
-    	kiwi.put(k, v);
+        kiwi.put(k, v);
         return null;	// can implement return value but not necessary
     }
     
@@ -66,14 +66,17 @@ public class KiWiMap implements CompositionalMap<Integer,Integer>
     @Override
     public Integer get(Object o)
     {
-
-        Get get = new Get((Integer)o, null);
-        TimedOperation timedOperation = new TimedOperation(get);
-        Integer res = kiwi.get((Integer)o);
-        timedOperation.setEnd();
-        get.setRetval(res);
-        historyLogger.logOperation(timedOperation);
-        return res;
+        if(historyLogger != null) {
+            Get get = new Get((Integer) o, null);
+            TimedOperation timedOperation = new TimedOperation(get);
+            Integer res = kiwi.get((Integer) o);
+            timedOperation.setEnd();
+            get.setRetval(res);
+            historyLogger.logOperation(timedOperation);
+            return res;
+        }else{
+            return kiwi.get((Integer) o);
+        }
     }
 
     @Override
@@ -113,23 +116,12 @@ public class KiWiMap implements CompositionalMap<Integer,Integer>
             TimedOperation timedOperation = new TimedOperation(scan);
             int res = kiwi.scan(result,min,max);
             timedOperation.setEnd();
-            scan.setRetval(Utils.convertArrayToList(result));
+            scan.setRetval(Utils.convertArrayToList(result, res));
             historyLogger.logOperation(timedOperation);
             return res;
         }else{
             return kiwi.scan(result,min,max);
         }
-/*
-    	Iterator<Integer> iter = kiwi.scan(min, max);
-    	int i;
-    	
-    	for (i = 0; (iter.hasNext()) && (i < result.length); ++i)
-    	{
-    		result[i] = iter.next();
-    	}
-    	
-    	return i;
-*/
     }
     
     /** same as put(key,val) for each item */
@@ -138,8 +130,8 @@ public class KiWiMap implements CompositionalMap<Integer,Integer>
     {
     	for (Integer key : map.keySet())
     	{
-    		kiwi.put(key, map.get(key));
-    	}
+                kiwi.put(key, map.get(key));
+        }
     }
     
     /** Same as get(key) != null **/
@@ -154,8 +146,8 @@ public class KiWiMap implements CompositionalMap<Integer,Integer>
     public void clear()
     {
     	//this.kiwi.debugPrint();
-    	ChunkInt.initPool();
-    	this.kiwi = new KiWi<>(new ChunkInt(), SupportScan);
+    	ChunkInt.initPool(historyLogger != null);
+    	this.kiwi = new KiWi<>(new ChunkInt(historyLogger != null), SupportScan);
     }
 
     /** Not implemented - can scan all & return keys **/

@@ -29,4 +29,9 @@ public class Get extends ConstDeterministicOperation<Integer> {
     public boolean weakEqual(MapOperation other) {
         return other.getClass() == Get.class && ((Get)other).key == key;
     }
+
+    @Override
+    public String toString() {
+        return String.format("G(%d,%d)", key, retval);
+    }
 }

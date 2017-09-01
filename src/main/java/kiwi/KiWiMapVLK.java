@@ -19,7 +19,7 @@ public class KiWiMapVLK implements CompositionalMap<Integer,Integer>
     /***************	Constructors		***************/
     public KiWiMapVLK()
     {
-    	this.kiwi = new KiWi<>(new ChunkCell());
+    	this.kiwi = new KiWi<>(new ChunkCell(false));
     }
     
     /***************	Methods				***************/
@@ -87,7 +87,7 @@ public class KiWiMapVLK implements CompositionalMap<Integer,Integer>
     public void clear()
     {
     	//this.kiwi.debugPrint();
-    	this.kiwi = new KiWi<>(new ChunkCell());
+    	this.kiwi = new KiWi<>(new ChunkCell(false));
     }
 
     /** Scan all & return keys **/

@@ -17,6 +17,8 @@
 
 package util;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
@@ -27,9 +29,10 @@ import java.util.Random;
 public class Utils
 {
   private static final Random rand = new Random();
-  private static final ThreadLocal<Random> rng = new ThreadLocal<Random>();
+  private static final ThreadLocal<Random> rng = new ThreadLocal<>();
+    private static final double DELAY_PROB = 0.8;
 
-  public static Random random() {
+    public static Random random() {
     Random ret = rng.get();
     if(ret == null) {
       ret = new Random(rand.nextLong());
@@ -116,9 +119,58 @@ public class Utils
 	 return Math.abs(hashval);
       }
 
-      public static ArrayList<Integer> convertArrayToList(Integer[] array){
+      public static ArrayList<Integer> convertArrayToList(Integer[] array, int size){
           ArrayList<Integer> intList = new ArrayList<Integer>();
-          Collections.addAll(intList, array);
+          for(int i = 0; i < size; ++i) {
+              intList.add(array[i]);
+          }
           return intList;
       }
+
+    public static String tempFolder() {
+        return Paths.get(System.getProperty("java.io.tmpdir"), "/history_" + Long.toString(System.nanoTime())).toString();
+    }
+
+    public static String multiplyString(String s, int amount){
+        return new String(new char[amount]).replace("\0", s);
+    }
+
+    static public String join(ArrayList<String> list, String conjunction)
+    {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (String item : list)
+        {
+            if (first)
+                first = false;
+            else
+                sb.append(conjunction);
+            sb.append(item);
+        }
+        return sb.toString();
+    }
+
+    public static boolean randomDelay(boolean delayForLinearizabilityTesting) {
+        if(delayForLinearizabilityTesting && Math.random() < Utils.DELAY_PROB){
+            try {
+                Thread.sleep(1);
+                return true;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        return false;
+    }
+
+    public static void clearFolder(String path) {
+        File folder = new File(path);
+        String[] entries = folder.list();
+        assert entries != null;
+        for(String s: entries){
+            File currentFile = new File(folder.getPath(), s);
+            assert currentFile.delete();
+        }
+        assert folder.delete();
+    }
 }

@@ -53,7 +53,7 @@ class SerializableOperationsList{
     }
 
     ArrayList<TimedOperation> getSortedList(){
-        System.out.format("#get %d #put %d #discard %d", get.size(), put.size(), discard.size());
+//        System.out.format("#get %d #put %d #discard %d", get.size(), put.size(), discard.size());
         ArrayList<TimedOperation> res = new ArrayList<>();
         for(int i = 0; i < get.size(); ++i){
             res.add(new TimedOperation(get.get(i), getTimes.get(i)));
@@ -117,16 +117,13 @@ public class HistoryJsonWriter {
 
     public void write() throws IOException{
         if(!Files.exists(Paths.get(directory))){
-            System.out.println("creating directory...");
             Files.createDirectories(Paths.get(directory));
         }
         Gson gson = new Gson();
         try(FileWriter file = new FileWriter(filepath.toString())){
             SerializableOperationsList obj = new SerializableOperationsList(operations);
             gson.toJson(obj, file);
-            System.out.format("Done saving - %d\n", core);
         }  catch (IOException e){
-            System.out.println("Error saving");
             e.printStackTrace();
         }
     }

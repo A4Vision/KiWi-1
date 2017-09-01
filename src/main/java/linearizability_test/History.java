@@ -1,6 +1,7 @@
 package linearizability_test;
 
 import com.sun.org.apache.xpath.internal.functions.FuncFalse;
+import util.Utils;
 
 import java.lang.reflect.Array;
 import java.util.*;
@@ -51,23 +52,39 @@ public class History {
 
 
 
-//    def __str__(self):
-//    times = self.allTimesSorted()
-//    time2index = {t: i for i, t in enumerate(times)}
-//    LEN = 10
-//    res = ""
-//            for i in sorted(self._sorted_thread_histories.keys()):
-//    prefix = "Core{:3d}: ".format(i)
-//    ops_strings = [' ' * LEN] * (len(times) * 2)
-//            for timed_op in self._sorted_thread_histories[i]:
-//    i1 = time2index[timed_op.interval.start]
-//    i2 = time2index[timed_op.interval.end]
-//    middle = (str(timed_op.operation) + ' ' * LEN)[:LEN]
+    public String toString(){
+        ArrayList<Double> times = allTimesSorted();
+        HashMap<Double, Integer> time2index = new HashMap<>();
+        for(int i = 0; i < times.size(); ++i){
+            time2index.put(times.get(i), i);
+        }
+
+        final int LEN = 15;
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < threadsHistories.size();++i){
+            String prefix = String.format("Core%3d: ", i);
+            String emptyOpString = Utils.multiplyString(" ", LEN);
+            ArrayList<String> opsStrings = new ArrayList<>(Collections.nCopies(times.size() * 2, emptyOpString));
+            for(TimedOperation timedOp: threadsHistories.get(i)){
+                int i1 = time2index.get(timedOp.interval.start);
+                int i2 = time2index.get(timedOp.interval.end);
+                String middle = (timedOp.operation.toString() + emptyOpString).substring(0, LEN);
+                opsStrings.set(i1 * 2, Utils.multiplyString(" ", LEN / 2) + "[" + Utils.multiplyString(" ", (LEN - 1) / 2));
+                opsStrings.set(i1 * 2 + 1, middle);
+                opsStrings.set(i2 * 2, Utils.multiplyString(" ", LEN / 2) + "]" + Utils.multiplyString(" ", (LEN - 1) / 2));
+            }
+            sb.append(prefix);
+            sb.append(Utils.join(opsStrings, " "));
+            sb.append("\n");
+        }
+
+        return sb.toString();
 //    ops_strings[i1 * 2] = ' ' * (LEN // 2) + '[' + ' ' * ((LEN - 1) // 2)
 //    ops_strings[i1 * 2 + 1] = middle
 //    ops_strings[i2 * 2] = ' ' * (LEN // 2) + ']' + ' ' * ((LEN - 1) // 2)
 //    res += prefix + ''.join(ops_strings) + '\n'
 //            return res
+    }
 
     private int n_cores(){
         return threadsHistories.size();
@@ -127,12 +144,17 @@ public class History {
             if (timed_op.interval.start < earliest_end_among_first) {
                 indices.set(i, indices.get(i) + 1);
                 MapOperation op = timed_op.operation;
+//                System.out.println("Do " + op.toString());
                 op.operate(map_state);
+//                System.out.println(map_state);
                 if (op.validate() && recursiveIsLinearizable(map_state, indices)) {
+//                    System.out.println("Undo " + op.toString());
                     op.undo(map_state);
                     return true;
                 } else {
+//                    System.out.println("Undo " + op.toString());
                     op.undo(map_state);
+//                    System.out.println(map_state);
                     indices.set(i, indices.get(i) - 1);
                 }
             }

@@ -8,18 +8,18 @@ public class ChunkCell extends Chunk<Cell, Cell>
 {
 	private static final int DATA_SIZE = 100;		// average # of BYTES of item in data array (guesstimate)
 	
-	public ChunkCell()
+	public ChunkCell(boolean delayForLinearizabilityTesting)
 	{
-		this(Cell.Empty, null);
+		this(Cell.Empty, null, delayForLinearizabilityTesting);
 	}
-	public ChunkCell(Cell minKey, ChunkCell creator)
+	public ChunkCell(Cell minKey, ChunkCell creator, boolean delayForLinearizabilityTesting)
 	{
-		super(minKey, DATA_SIZE, creator);
+		super(minKey, DATA_SIZE, creator, delayForLinearizabilityTesting);
 	}
 	@Override
 	public Chunk<Cell,Cell> newChunk(Cell minKey)
 	{
-		return new ChunkCell(minKey.clone(), this);
+		return new ChunkCell(minKey.clone(), this, delayForLinearizabilityTesting);
 	}
 	
 	
@@ -40,7 +40,17 @@ public class ChunkCell extends Chunk<Cell, Cell>
 		throw new NotImplementedException();
 	}
 
-	@Override
+    @Override
+    public void printLinkedList() {
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public void printData(int orderIndex) {
+        throw new NotImplementedException();
+    }
+
+    @Override
 	public int allocate(Cell key, Cell data)
 	{
 		throw new NotImplementedException();
