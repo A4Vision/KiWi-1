@@ -133,6 +133,7 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
 				else if (itemVer == currVer)
 				{
 					// same chunk & version but items's index is larger - don't replace
+					// TODO: correct this to compare data index instead of order index.
 					if (item.orderIndex > currPut.orderIndex)
 						continue;
 				}
@@ -826,6 +827,7 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
 		// --retry so long as version is negative (which means item isn't in linked-list)
 		while (get(orderIndex, OFFSET_VERSION) < 0)
 		{
+
 			// remember next pointer in entry we're trying to add
 			int savedNext = get(orderIndex, OFFSET_NEXT);
 			
@@ -854,7 +856,7 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
 				
 				// compare current item's key to ours
 				cmp = readKey(curr).compareTo(key);
-				
+
 				// if current item's key is larger, done searching - add between prev and curr
 				if (cmp > 0)
 					break;
@@ -930,7 +932,6 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
 			}
 		}
 //		System.out.format("addToList idx=%d tid=%d\n", orderIndex, KiWi.threadId());
-//        printLinkedList();
 	}
 
 	private boolean casData(int curr, Object currData, Object data) {
@@ -1180,7 +1181,7 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
 		int di = dataIndex.getAndIncrement();
 		// Assaf: My change - orderIndex and dataIndex should be the same, so entries may be ordered
         //        by dataIndex.
-		di = oi / ORDER_SIZE;
+		di = (oi + (ORDER_SIZE - FIRST_ITEM)) / ORDER_SIZE;
 		if (di >= dataArray.length)
 			return -1;
 
