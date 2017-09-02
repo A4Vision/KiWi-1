@@ -244,15 +244,18 @@ public class KiWi<K extends Comparable<? super K>, V> implements ChunkIterator<K
 	/**
 	 * Remove nulls from the given array, return new size of the array.
 	 * Keeps order of given array.
-	 * @param arr
+	 * @param arrValues
 	 * @param size
 	 * @return Size of array, after removing nulls.
 	 */
-	private int removeNulls(V[] arr, int size){
+	private int removeNulls(V[] arrValues, K[] arrKeys, boolean clearKeys, int size){
 		int nullCount = 0;
 		for(int i = 0; i < size; ++i){
-			if(arr[i] != null){
-				arr[i - nullCount] = arr[i];
+			if(arrValues[i] != null){
+				arrValues[i - nullCount] = arrValues[i];
+				if(clearKeys){
+					arrKeys[i - nullCount] = arrKeys[i];
+				}
 			}else{
 				nullCount++;
 			}
@@ -260,7 +263,7 @@ public class KiWi<K extends Comparable<? super K>, V> implements ChunkIterator<K
 		return size - nullCount;
 	}
 
-	public int scan(V[] result, K min, K max) {
+	public int scan(V[] resultValues, K[] resultKeys, boolean addKeys, K min, K max) {
 		// get current version and increment version (atomically) for this scan
 		// all items beyond my version are ignored by this scan
 		// the newVersion() method is used to ensure my version is published correctly,
@@ -283,10 +286,10 @@ public class KiWi<K extends Comparable<? super K>, V> implements ChunkIterator<K
 			// (so old put() op doesn't suddently set an old version this scan() needs to see,
 			//  but after the scan() passed it)
 			SortedMap<K,PutData<K,V>> items = c.helpPutInScan(myVer, min, max);
-			itemsCount += c.copyValues(result, itemsCount, myVer, min, max, items);
+			itemsCount += c.copyRange(resultValues, resultKeys, addKeys, itemsCount, myVer, min, max, items);
 			c = c.next.getReference();
 		}
-		int noNullsCount = removeNulls(result, itemsCount);
+		int noNullsCount = removeNulls(resultValues, resultKeys, addKeys, itemsCount);
 		// remove scan from scan array
 		publishScan(null);
 

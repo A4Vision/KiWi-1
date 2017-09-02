@@ -70,7 +70,7 @@ public class KiWiMapVLK implements CompositionalMap<Integer,Integer>
     }
 
     @Override
-    public int getRange(Integer[] result, Integer min, Integer max)
+    public int getRange(Integer[] result, Integer[] resultKeys, boolean addKeys, Integer min, Integer max)
     {
         throw new NotImplementedException();
     }

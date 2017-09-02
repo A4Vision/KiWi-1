@@ -129,7 +129,8 @@ public class ChunkInt extends Chunk<Integer,Integer>
     }
 
 	@Override
-	public int copyValues(Object[] result, int idx, int myVer, Integer min, Integer max, SortedMap<Integer, ThreadData.PutData<Integer,Integer>> items) {
+	public int copyRange(Object[] resultValues, Object[] resultKeys, boolean addKeys,
+						  int idx, int myVer, Integer min, Integer max, SortedMap<Integer, ThreadData.PutData<Integer,Integer>> items) {
 	    // Fetch for each relevant key the corresponding value.
         // A key is relevant if it has the largest good version (<= myVer).
         // All items in the TreeMap are relevant.
@@ -178,7 +179,10 @@ public class ChunkInt extends Chunk<Integer,Integer>
                 break;
             if(key > lastKey){
                 if(getVersion(currentOrderIndex) <= myVer) {
-                    result[idx + itemsCount] = getData(currentOrderIndex);
+                    resultValues[idx + itemsCount] = getData(currentOrderIndex);
+                    if(addKeys) {
+						resultKeys[idx + itemsCount] = key;
+					}
                     bestOI = currentOrderIndex;
                     lastKey = key;
                     itemsCount++;
@@ -190,7 +194,7 @@ public class ChunkInt extends Chunk<Integer,Integer>
                     if(compareOIsVersion(currentOrderIndex, bestOI) > 0){
 //                        System.out.format("replacing oi=%d with oi=%d\n", bestOI, currentOrderIndex);
                         // Override previous selection
-                        result[idx + itemsCount - 1] = getData(currentOrderIndex);
+                        resultValues[idx + itemsCount - 1] = getData(currentOrderIndex);
                         bestOI = currentOrderIndex;
                     }else{
 //                        System.out.println("not replacing");

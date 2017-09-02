@@ -33,7 +33,7 @@ public class Scan extends ConstDeterministicOperation<ArrayList<Integer>> {
     @Override
     public void operateKiWi(KiWiMap map) {
         Integer[] result = new Integer[1000];
-        int length = map.getRange(result, startKey, endKey);
+        int length = map.getRange(result, null, false, startKey, endKey);
         retval = Utils.convertArrayToList(result, length);
     }
 

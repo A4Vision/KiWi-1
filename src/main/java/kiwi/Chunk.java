@@ -2,6 +2,7 @@ package kiwi;
 
 import kiwi.ThreadData.PutData;
 import sun.misc.Unsafe;
+import util.Utils;
 
 import java.lang.reflect.Constructor;
 import java.util.List;
@@ -82,7 +83,7 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
 		return cas(oi,OFFSET_VERSION, NONE, FREEZE_VERSION);
 	}
 
-	public abstract int copyValues(Object[] result, final int idx, final int myVer, final K min, final K max, final SortedMap<K,PutData<K,V>> items);
+	public abstract int copyRange(Object[] resultValues, Object[] resultKeys, boolean addKeys, final int idx, final int myVer, final K min, final K max, final SortedMap<K,PutData<K,V>> items);
 
 	/** this method is used by scan operations (ONLY) to help pending put operations set a version
 	 * @return sorted map of items matching key range of any currently-pending put operation */
@@ -910,10 +911,12 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
 			// and we need to avoid race conditions with other put ops and helpers
 			if (cas(orderIndex, OFFSET_NEXT, savedNext, curr))
 			{
+				Utils.randomDelay(delayForLinearizabilityTesting);
 				// try to CAS curr's next to point from "next" to me
 				// if successful - we're done, exit loop. Otherwise retry (return to "while true" loop)
 				if (cas(prev, OFFSET_NEXT, curr, orderIndex))
 				{
+					Utils.randomDelay(delayForLinearizabilityTesting);
 					// if some CAS failed we restart, if both successful - we're done
 					// update version to positive (getVersion() always returns positive number) to mark item is linked
 					set(orderIndex, OFFSET_VERSION, getVersion(orderIndex));

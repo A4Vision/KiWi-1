@@ -21,7 +21,7 @@ import static org.junit.Assert.assertTrue;
 
 
 public class KiWiSizeBoundsLinearizability {
-    final static int NUM_ITERATIONS = 100;
+    private final static int NUM_ITERATIONS = 100;
 
     @Test
     public void explicitTest1() throws IOException, InterruptedException {

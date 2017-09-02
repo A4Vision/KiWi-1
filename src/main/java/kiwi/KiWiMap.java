@@ -109,18 +109,19 @@ public class KiWiMap implements CompositionalMap<Integer,Integer>
     }
 
     @Override
-    public int getRange(Integer[] result, Integer min, Integer max)
+    public int getRange(Integer[] resultValues, Integer[] resultKeys, boolean addKeys,
+                        Integer min, Integer max)
     {
         if(historyLogger != null){
             Scan scan = new Scan(min, max, null);
             TimedOperation timedOperation = new TimedOperation(scan);
-            int res = kiwi.scan(result,min,max);
+            int res = kiwi.scan(resultValues, resultKeys, addKeys, min,max);
             timedOperation.setEnd();
-            scan.setRetval(Utils.convertArrayToList(result, res));
+            scan.setRetval(Utils.convertArrayToList(resultValues, res));
             historyLogger.logOperation(timedOperation);
             return res;
         }else{
-            return kiwi.scan(result,min,max);
+            return kiwi.scan(resultValues, resultKeys, addKeys, min, max);
         }
     }
     
