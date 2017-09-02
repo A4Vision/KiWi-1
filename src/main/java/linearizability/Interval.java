@@ -1,4 +1,4 @@
-package linearizability_test;
+package linearizability;
 
 /**
  * Created by bugabuga on 27/08/17.

@@ -1,13 +1,12 @@
 package kiwi;
 
-import linearizability_test.*;
+import linearizability.*;
 import org.junit.Test;
 import util.Utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
 
 import static org.junit.Assert.*;
 

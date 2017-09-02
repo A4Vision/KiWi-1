@@ -3,7 +3,7 @@ package kiwi;
 import java.io.IOException;
 import java.util.*;
 
-import linearizability_test.*;
+import linearizability.*;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import util.Utils;
 

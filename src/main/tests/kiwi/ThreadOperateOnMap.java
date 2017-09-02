@@ -1,6 +1,6 @@
 package kiwi;
 
-import linearizability_test.MapOperation;
+import linearizability.MapOperation;
 
 import java.util.ArrayList;
 

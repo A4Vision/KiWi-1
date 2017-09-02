@@ -1,4 +1,4 @@
-package linearizability_test;
+package linearizability;
 
 import kiwi.KiWiMap;
 
@@ -7,8 +7,8 @@ import java.util.Map;
 /**
  * Created by bugabuga on 01/09/17.
  */
-public class SizeLowerBound extends ConstDeterministicOperation<Integer> {
-    public SizeLowerBound(Integer retval) {
+public class SizeUpperBound extends ConstDeterministicOperation<Integer> {
+    public SizeUpperBound(Integer retval) {
         super(retval);
     }
 
@@ -19,16 +19,22 @@ public class SizeLowerBound extends ConstDeterministicOperation<Integer> {
 
     @Override
     public boolean validate() {
-        return retval <= actualRetval;
+        return retval >= actualRetval;
     }
 
     @Override
     public void operateKiWi(KiWiMap map) {
-        retval = map.sizeLowerBound();
+        retval = map.sizeUpperBound();
     }
 
     @Override
     public boolean weakEqual(MapOperation other) {
-        return other.getClass() == SizeLowerBound.class;
+        return other.getClass() == SizeUpperBound.class;
     }
+
+    @Override
+    public String toString() {
+        return String.format("U(%d)", retval);
+    }
+
 }

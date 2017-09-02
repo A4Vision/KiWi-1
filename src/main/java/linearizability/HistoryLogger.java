@@ -1,10 +1,9 @@
-package linearizability_test;
+package linearizability;
 
 import kiwi.KiWi;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 
 /**
  * Created by bugabuga on 01/09/17.

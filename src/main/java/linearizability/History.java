@@ -1,9 +1,7 @@
-package linearizability_test;
+package linearizability;
 
-import com.sun.org.apache.xpath.internal.functions.FuncFalse;
 import util.Utils;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 /**

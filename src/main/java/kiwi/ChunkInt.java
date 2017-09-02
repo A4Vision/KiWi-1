@@ -190,7 +190,7 @@ public class ChunkInt extends Chunk<Integer,Integer>
                     if(compareOIsVersion(currentOrderIndex, bestOI) > 0){
 //                        System.out.format("replacing oi=%d with oi=%d\n", bestOI, currentOrderIndex);
                         // Override previous selection
-                        result[idx + itemsCount - 1] = dataArray[get(currentOrderIndex, OFFSET_DATA)];
+                        result[idx + itemsCount - 1] = getData(currentOrderIndex);
                         bestOI = currentOrderIndex;
                     }else{
 //                        System.out.println("not replacing");
@@ -228,6 +228,7 @@ public class ChunkInt extends Chunk<Integer,Integer>
 			// get data index
 			if(data != null) {
 				int di = get(oi, OFFSET_DATA);
+				assert di > 0;
 				dataArray[di] = data;
 			}
 

@@ -241,6 +241,25 @@ public class KiWi<K extends Comparable<? super K>, V> implements ChunkIterator<K
 		return;
 	}
 
+	/**
+	 * Remove nulls from the given array, return new size of the array.
+	 * Keeps order of given array.
+	 * @param arr
+	 * @param size
+	 * @return Size of array, after removing nulls.
+	 */
+	private int removeNulls(V[] arr, int size){
+		int nullCount = 0;
+		for(int i = 0; i < size; ++i){
+			if(arr[i] != null){
+				arr[i - nullCount] = arr[i];
+			}else{
+				nullCount++;
+			}
+		}
+		return size - nullCount;
+	}
+
 	public int scan(V[] result, K min, K max) {
 		// get current version and increment version (atomically) for this scan
 		// all items beyond my version are ignored by this scan
@@ -267,11 +286,11 @@ public class KiWi<K extends Comparable<? super K>, V> implements ChunkIterator<K
 			itemsCount += c.copyValues(result, itemsCount, myVer, min, max, items);
 			c = c.next.getReference();
 		}
-
+		int noNullsCount = removeNulls(result, itemsCount);
 		// remove scan from scan array
 		publishScan(null);
 
-		return itemsCount;
+		return noNullsCount;
 	}
 
 	@Override

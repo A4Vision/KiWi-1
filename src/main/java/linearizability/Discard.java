@@ -1,4 +1,4 @@
-package linearizability_test;
+package linearizability;
 
 import kiwi.KiWiMap;
 
@@ -54,5 +54,8 @@ public class Discard implements MapOperation {
         return other.getClass() == Discard.class && ((Discard)other).key == key;
     }
 
-
+    @Override
+    public String toString() {
+        return String.format("D(%d)", key);
+    }
 }

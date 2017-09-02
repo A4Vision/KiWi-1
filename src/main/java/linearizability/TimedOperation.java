@@ -1,4 +1,4 @@
-package linearizability_test;
+package linearizability;
 
 import java.util.Comparator;
 
