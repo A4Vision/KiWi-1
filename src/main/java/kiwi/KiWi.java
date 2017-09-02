@@ -264,11 +264,6 @@ public class KiWi<K extends Comparable<? super K>, V> implements ChunkIterator<K
 			// (so old put() op doesn't suddently set an old version this scan() needs to see,
 			//  but after the scan() passed it)
 			SortedMap<K,PutData<K,V>> items = c.helpPutInScan(myVer, min, max);
-			if(items.size() > 0){
-				System.out.println("Found pending puts !!! " + Integer.toString(items.size()));
-			}else{
-				System.out.println("no pending puts");
-			}
 			itemsCount += c.copyValues(result, itemsCount, myVer, min, max, items);
 			c = c.next.getReference();
 		}

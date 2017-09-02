@@ -219,7 +219,7 @@ public class ChunkInt extends Chunk<Integer,Integer>
 	{
 		// allocate items in order and data array => data-array only contains int-sized data
 		int oi = baseAllocate( data == null ? 0 : DATA_SIZE);
-        System.out.format("oi=%d, di=%d, val=%d\n", oi, get(oi, OFFSET_DATA), data);
+//        System.out.format("oi=%d, di=%d, val=%d\n", oi, get(oi, OFFSET_DATA), data);
 		if (oi >= 0)
 		{
 			// write integer key into (int) order array at correct offset

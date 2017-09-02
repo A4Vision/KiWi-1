@@ -7,6 +7,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -533,11 +534,16 @@ public class RebalancerTest {
         KiWiMap kmap = new KiWiMap();
         Chunk.MAX_ITEMS = 1024;
         int itemsToInsert = Chunk.MAX_ITEMS + 450;
+        long start = System.currentTimeMillis();
         for(int i = 0; i < itemsToInsert; ++i)
         {
             kmap.put((Integer)i,(Integer) i);
+            assertEquals((Integer)i, kmap.get(i));
         }
-
+        long end = System.currentTimeMillis();
+        String message = String.format("KiWi fill time %d\n", end - start);
+        // Normally, takes 50ms
+        assertTrue(message, end - start  < 200);
         DebugStats ds = kmap.kiwi.calcChunkStatistics();
 
         assertTrue(ds.itemCount == itemsToInsert);
