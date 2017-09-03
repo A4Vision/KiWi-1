@@ -1,8 +1,5 @@
 package kiwi;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-import util.Utils;
-
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -10,39 +7,46 @@ public class ChunkInt extends Chunk<Integer,Integer>
 {
 	private static AtomicInteger nextChunk;
 	private static ChunkInt[] chunks;
-	public static void setPoolSize(int numChunks)
-	{
+
+	public static void setPoolSize(int numChunks) {
 		chunks = new ChunkInt[numChunks];
-		
 	}
+
 	public static void initPool(boolean delayForLinearizabilityTesting)
 	{
 		if (chunks != null)
 		{
 			nextChunk = new AtomicInteger(0);
 			for (int i = 0; i < chunks.length; ++i)
-				chunks[i] = new ChunkInt(null, null, delayForLinearizabilityTesting);
+				chunks[i] = new ChunkInt(null, null, delayForLinearizabilityTesting, new LowerUpperBounds(true));
+			// use fake bounds calculator, newChunk() sets this element anyway.
 		}
 	}
 	
 	private static final int DATA_SIZE = 1;//Integer.SIZE/8;	// average # of BYTES of item in data array (guesstimate)
 	public ChunkInt(){
-		this(false);
+		this(false, new LowerUpperBounds(true));
 	}
-	public ChunkInt(boolean delayForLinearizabilityTesting)
+	public ChunkInt(boolean delayForLinearizabilityTesting, LowerUpperBounds sizeBounds)
 	{
-		this(Integer.MIN_VALUE, null, delayForLinearizabilityTesting);
+		this(Integer.MIN_VALUE, null, delayForLinearizabilityTesting, sizeBounds);
 	}
-	public ChunkInt(Integer minKey, ChunkInt creator, boolean delayForLinearizabilityTesting)
+
+	public ChunkInt(Integer minKey, ChunkInt creator, boolean delayForLinearizabilityTesting){
+		this(minKey, creator, delayForLinearizabilityTesting, new LowerUpperBounds(true));
+	}
+
+	public ChunkInt(Integer minKey, ChunkInt creator, boolean delayForLinearizabilityTesting, LowerUpperBounds sizeBounds)
 	{
-		super(minKey, DATA_SIZE, creator, delayForLinearizabilityTesting);
+		super(minKey, DATA_SIZE, creator, delayForLinearizabilityTesting, sizeBounds);
 	}
+
 	@Override
 	public Chunk<Integer,Integer> newChunk(Integer minKey)
 	{
 		if (chunks == null)
 		{
-			return new ChunkInt(minKey, this, delayForLinearizabilityTesting);
+			return new ChunkInt(minKey, this, delayForLinearizabilityTesting, sizeBounds);
 		}
 		else
 		{
@@ -51,6 +55,7 @@ public class ChunkInt extends Chunk<Integer,Integer>
 			chunks[next] = null;
 			chunk.minKey = minKey;
 			chunk.creator = this;
+			chunk.sizeBounds = sizeBounds;
 			return chunk;
 		}
 	}

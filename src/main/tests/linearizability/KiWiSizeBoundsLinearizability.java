@@ -21,7 +21,7 @@ import static org.junit.Assert.assertTrue;
 
 
 public class KiWiSizeBoundsLinearizability {
-    private final static int NUM_ITERATIONS = 100;
+    private final static int NUM_ITERATIONS = 200;
 
     @Test
     public void explicitTest1() throws IOException, InterruptedException {
@@ -31,6 +31,28 @@ public class KiWiSizeBoundsLinearizability {
                 new Put(2, 3), new SizeUpperBound(null), new SizeLowerBound(null)));
         for(int j = 0; j < NUM_ITERATIONS; ++j) {
             KiWiLinearizabilityUtils.KiWiIsLinearizableWithSpecificOperations(new ArrayList<>(Arrays.asList(ops0, ops1)));
+        }
+    }
+
+    @Test
+    public void randomPutGetScanDiscardTestSizeBounds1() throws IOException, InterruptedException {
+        for(int j = 0; j < NUM_ITERATIONS; ++j) {
+            if (j % 100 == 0) {
+                System.out.println(j);
+            }
+            KiWiLinearizabilityUtils.KiWiIsLinearizableRandomOperations(j, 2, 5, 4,
+                    0.2, 0.2, 0.1, 0.1, 0.1);
+        }
+    }
+
+    @Test
+    public void randomPutGetScanDiscardTestSizeBounds2() throws IOException, InterruptedException {
+        for(int j = 0; j < NUM_ITERATIONS; ++j) {
+            if (j % 100 == 0) {
+                System.out.println(j);
+            }
+            KiWiLinearizabilityUtils.KiWiIsLinearizableRandomOperations(j, 4, 6, 4,
+                    0.1, 0.3, 0.1, 0.1, 0.2);
         }
     }
 }

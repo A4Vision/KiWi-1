@@ -22,7 +22,7 @@ import java.util.Random;
 
 
 public class KiwiLinearizabilityTest {
-    private static final int NUM_ITERATIONS = 1000;
+    private static final int NUM_ITERATIONS = 500;
 
     @Test
     public void explicitTest1() throws IOException, InterruptedException {
@@ -94,8 +94,42 @@ public class KiwiLinearizabilityTest {
     }
 
     @Test
+    public void explicitTest7() throws IOException, InterruptedException {
+        ArrayList<MapOperation> ops0 = new ArrayList<>(Arrays.asList(
+                new Put(0, 0), new Get(0, null), new Put(1, 3), new Get(0, null), new Get(0, null), new Get(0, null), new Get(1, null), new Scan(1, 1, null)));
+        ArrayList<MapOperation> ops1 = new ArrayList<>(Arrays.asList(
+                new Put(0, 0), new Get(0, null), new Put(1, 2)));
+        for(int j = 0; j < NUM_ITERATIONS; ++j) {
+            KiWiLinearizabilityUtils.KiWiIsLinearizableWithSpecificOperations(new ArrayList<>(Arrays.asList(ops0, ops1)));
+        }
+    }
+
+    @Test
+    public void explicitTest8() throws IOException, InterruptedException {
+        ArrayList<MapOperation> ops0 = new ArrayList<>(Arrays.asList(
+                new Put(10, 11), new Put(1, 2)));
+        ArrayList<MapOperation> ops1 = new ArrayList<>(Arrays.asList(
+                new Put(10, 11), new Scan(1, 0, null), new Put(1, 3)));
+        for(int j = 0; j < NUM_ITERATIONS; ++j) {
+            KiWiLinearizabilityUtils.KiWiIsLinearizableWithSpecificOperations(new ArrayList<>(Arrays.asList(ops0, ops1)));
+        }
+    }
+
+    @Test
+    public void explicitTest9() throws IOException, InterruptedException {
+        ArrayList<MapOperation> ops0 = new ArrayList<>(Arrays.asList(
+                new Put(1, 2)));
+        ArrayList<MapOperation> ops1 = new ArrayList<>(Arrays.asList(
+                new Get(1, null), new Discard(1), new Get(1, null)));
+        for(int j = 0; j < NUM_ITERATIONS; ++j) {
+            KiWiLinearizabilityUtils.KiWiIsLinearizableWithSpecificOperations(new ArrayList<>(Arrays.asList(ops0, ops1)));
+        }
+    }
+
+    @Test
     public void testsFromFiles() throws IOException, InterruptedException {
-        String[] files = {Paths.get(System.getProperty("user.home"), "problematic_histories", "history_54173420026714").toString()};
+//        String[] files = {Paths.get(System.getProperty("user.home"), "problematic_histories", "history_54173420026714").toString()};
+        String[] files = {"/tmp/history_62913341771089", "/tmp/history_62902665448097"};
         KiWiLinearizabilityUtils.KiWiIsLinearizableOperationsFromHistoryFiles(files);
     }
 
@@ -116,7 +150,7 @@ public class KiwiLinearizabilityTest {
             if (j % 100 == 0) {
                 System.out.println(j);
             }
-            KiWiLinearizabilityUtils.KiWiIsLinearizableRandomOperations(j, 3, 5, 4,
+            KiWiLinearizabilityUtils.KiWiIsLinearizableRandomOperations(j, 2, 4, 2,
                     0.4, 0.2, 0., 0., 0.3);
         }
     }

@@ -17,20 +17,22 @@ public class KiWiMap implements CompositionalMap<Integer,Integer>
 	/***************	Members				***************/
 	public static boolean			SupportScan = true;
     public static int               RebalanceSize = 2;
+    private LowerUpperBounds sizeBounds; // Bounds the map size from below and from above.
 
-	public KiWi<Integer,Integer>	kiwi;
+    public KiWi<Integer,Integer>	kiwi;
 	private HistoryLogger historyLogger;
 
     /***************	Constructors		***************/
     public KiWiMap(){
-        this(false);
+        this(false, false);
     }
 
-    public KiWiMap(boolean logOperations)
+    public KiWiMap(boolean logOperations, boolean calculateSizeBounds)
     {
+        sizeBounds = new LowerUpperBounds(!calculateSizeBounds);
     	ChunkInt.initPool(logOperations);
         KiWi.RebalanceSize = RebalanceSize;
-    	this.kiwi = new KiWi<>(new ChunkInt(logOperations), SupportScan);
+    	this.kiwi = new KiWi<>(new ChunkInt(logOperations, sizeBounds), SupportScan, sizeBounds);
     	if(logOperations) {
             historyLogger = new HistoryLogger();
         }else{
@@ -148,7 +150,8 @@ public class KiWiMap implements CompositionalMap<Integer,Integer>
     {
     	//this.kiwi.debugPrint();
     	ChunkInt.initPool(historyLogger != null);
-    	this.kiwi = new KiWi<>(new ChunkInt(historyLogger != null), SupportScan);
+    	sizeBounds = new LowerUpperBounds(sizeBounds.isFake);
+    	this.kiwi = new KiWi<>(new ChunkInt(historyLogger != null, sizeBounds), SupportScan, sizeBounds);
     }
 
     /** Not implemented - can scan all & return keys **/
@@ -210,13 +213,13 @@ public class KiWiMap implements CompositionalMap<Integer,Integer>
         if(historyLogger != null) {
             SizeUpperBound bound = new SizeUpperBound(null);
             TimedOperation timedOperation = new TimedOperation(bound);
-            int res = Integer.MAX_VALUE;
+            int res = kiwi.upperSizeBound();
             timedOperation.setEnd();
             bound.setRetval(res);
             historyLogger.logOperation(timedOperation);
             return res;
         }else{
-            return Integer.MAX_VALUE;
+            return kiwi.upperSizeBound();
         }
     }
 
@@ -226,13 +229,13 @@ public class KiWiMap implements CompositionalMap<Integer,Integer>
         if(historyLogger != null) {
             SizeLowerBound bound = new SizeLowerBound(null);
             TimedOperation timedOperation = new TimedOperation(bound);
-            int res = 0;
+            int res = kiwi.lowerSizeBound();
             timedOperation.setEnd();
             bound.setRetval(res);
             historyLogger.logOperation(timedOperation);
             return res;
         }else{
-            return 0;
+            return kiwi.lowerSizeBound();
         }
     }
 

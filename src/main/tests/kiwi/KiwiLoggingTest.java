@@ -18,7 +18,7 @@ public class KiwiLoggingTest {
     @Test
     public void loggingOfKiwiMap() throws IOException, InterruptedException {
         String tempFolder = Utils.tempFolder();
-        KiWiMap map = new KiWiMap(true);
+        KiWiMap map = new KiWiMap(true, true);
         ArrayList<ArrayList<MapOperation>> mapOperations = new ArrayList<>();
         mapOperations.add(new ArrayList<>(Arrays.asList(
                 new Get(0, null), new Put(2, 3), new SizeLowerBound(null)

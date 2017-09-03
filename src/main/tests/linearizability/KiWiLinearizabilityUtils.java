@@ -46,7 +46,7 @@ public class KiWiLinearizabilityUtils {
 
 
     static void KiWiIsLinearizableWithSpecificOperations(ArrayList<ArrayList<MapOperation>> opsLists) throws InterruptedException, IOException {
-        KiWiMap map = new KiWiMap(true);
+        KiWiMap map = new KiWiMap(true, true);
         ArrayList<Thread> threads = new ArrayList<>();
         String tempFolder = Utils.tempFolder();
         for (ArrayList<MapOperation> ops: opsLists) {

@@ -18,6 +18,7 @@ public class KiWi<K extends Comparable<? super K>, V> implements ChunkIterator<K
 
 	/*************** Members ***************/
 	private final ConcurrentSkipListMap<K , Chunk<K, V>>	skiplist;		// skiplist of chunks for fast navigation
+	private LowerUpperBounds sizeBounds;
 	protected AtomicInteger 							version;		// current version to add items with
 	private final boolean								withScan;		// support scan operations or not (scans add thread-array)
 	private final ScanData[]		scanArray;
@@ -27,12 +28,14 @@ public class KiWi<K extends Comparable<? super K>, V> implements ChunkIterator<K
 	/*************** Constructors ***************/
 	public KiWi(Chunk<K,V> head)
 	{
-		this(head, false);
+		this(head, false, new LowerUpperBounds(true));
 	}
 	
 	@SuppressWarnings("unchecked")
-	public KiWi(Chunk<K,V> head, boolean withScan)
+	public KiWi(Chunk<K,V> head, boolean withScan, LowerUpperBounds sizeBounds)
 	{
+		this.sizeBounds = sizeBounds;
+
 		this.skiplist = new ConcurrentSkipListMap<>();
 		this.version = new AtomicInteger(2);	// first version is 2 - since 0 means NONE, and -1 means FREEZE
 
@@ -57,7 +60,15 @@ public class KiWi<K extends Comparable<? super K>, V> implements ChunkIterator<K
 	{
 		return (PAD_SIZE + idx*PAD_SIZE);
 	}
-	
+
+	public int lowerSizeBound(){
+		return sizeBounds.getLowerBound();
+	}
+
+	public int upperSizeBound(){
+		return sizeBounds.getUpperBound();
+	}
+
 	public V get(K key)
 	{
 		// find chunk matching key
@@ -79,15 +90,14 @@ public class KiWi<K extends Comparable<? super K>, V> implements ChunkIterator<K
 		return c.find(key, pd);
 	}
 
-	public void put(K key, V val)
-	{
+	public void put(K key, V val){
 		// find chunk matching key
 		Chunk<K,V> c = skiplist.floorEntry(key).getValue();
 		
 		// repeat until put operation is successful
 		while (true)
 		{
-			Utils.randomDelay(delayForLinearizabilityTesting);
+//			Utils.randomDelay(delayForLinearizabilityTesting, 1);
 			// the chunk we have might have been in part of split so not accurate
 			// we need to iterate the chunks to find the correct chunk following it
 			c = iterateChunks(c, key);
@@ -105,7 +115,7 @@ public class KiWi<K extends Comparable<? super K>, V> implements ChunkIterator<K
 			// allocate space in chunk for key & value
 			// this also writes key&val into the allocated space
 			int oi = c.allocate(key, val);
-			Utils.randomDelay(delayForLinearizabilityTesting);
+//			Utils.randomDelay(delayForLinearizabilityTesting, 1);
 			
 			// if failed - chunk is full, compact it & retry
 			if (oi < 0)
@@ -115,13 +125,14 @@ public class KiWi<K extends Comparable<? super K>, V> implements ChunkIterator<K
 					return;
 				continue;
 			}
-			
+			sizeBounds.startInsert(val == null);
 			if (withScan)
 			{
-				Utils.randomDelay(delayForLinearizabilityTesting);
+//				Utils.randomDelay(delayForLinearizabilityTesting, 1);
 				// publish put operation in thread array
 				// publishing BEFORE setting the version so that other operations can see our value and help
 				// this is in order to prevent us from adding an item with an older version that might be missed by others (scan/get)
+
 				c.publishPut(new PutData<>(c, oi));
 
 
@@ -129,7 +140,7 @@ public class KiWi<K extends Comparable<? super K>, V> implements ChunkIterator<K
 				{
 					// if succeeded to freeze item -- it is not accessible, need to reinsert it in rebalanced chunk
 					if(c.tryFreezeItem(oi)) {
-						Utils.randomDelay(delayForLinearizabilityTesting);
+						Utils.randomDelay(delayForLinearizabilityTesting, 1);
 						c.publishPut(null);
 						c = rebalance(c);
 
@@ -137,31 +148,31 @@ public class KiWi<K extends Comparable<? super K>, V> implements ChunkIterator<K
 					}
 				}
 			}
-			// Slow put after publishing - raise the chance that a parallel Scan will help this put.
-			if(delayForLinearizabilityTesting) {
-				for (int i = 0; i < 40; ++i)
-					Utils.randomDelay(true);
-			}
+			// Slow put after publishing version - raise the chance that a parallel Scan will help this put.
+            Utils.randomDelay(delayForLinearizabilityTesting, 10);
 			// try to update the version to current version, but use whatever version is successfuly set
 			// reading & setting version AFTER publishing ensures that anyone who sees this put op has
 			// a version which is at least the version we're setting, or is otherwise setting the version itself
 			int myVersion = c.setVersion(oi, this.version.get());
-			
+
+			// Slow put after setting version - raise the chance that a parallel Put with higher orderIndex,
+			// will run addToList() before us.
+            Utils.randomDelay(delayForLinearizabilityTesting, 20);
 			// if chunk is frozen, clear published data, compact it and retry
 			// (when freezing, version is set to FREEZE)
 			if (myVersion == Chunk.FREEZE_VERSION)
 			{
 				// clear thread-array item if needed
 				c.publishPut(null);
-				Utils.randomDelay(delayForLinearizabilityTesting);
+				Utils.randomDelay(delayForLinearizabilityTesting, 1);
 				c = rebalance(c);
 				continue;
 			}
-			
 			// allocation is done (and published) and has a version
 			// all that is left is to insert it into the chunk's linked list
+
 			c.addToList(oi, key);
-			
+            Utils.randomDelay(delayForLinearizabilityTesting, 1);
 			// delete operation from thread array - and done
 			c.publishPut(null);
 
