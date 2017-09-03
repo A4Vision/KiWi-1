@@ -45,6 +45,12 @@ public class LowerUpperBounds{
     }
 
     public void finishInsert(boolean newDataIsNull, boolean oldDataIsNull) {
+        // Could be simplified to the less verbose pseudo-code:
+//        if(oldDataIsNull){
+//            lowerBound.increment();
+//        }else{
+//            upperBound.decrement();
+//        }
         if(newDataIsNull){
             if(oldDataIsNull){
                 undoAboutToRemove();

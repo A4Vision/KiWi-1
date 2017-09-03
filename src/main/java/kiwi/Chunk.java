@@ -826,7 +826,7 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
 	{
 		int prev, curr;
 		int ancor = -1;
-		V value = getData(orderIndex);
+		boolean dataIsNull = (getData(orderIndex) == null);
 		// retry adding to list until successful
 		// no items are removed from list - so we don't need to restart on failures
 		// so if we CAS some node's next and fail, we can continue from it
@@ -841,9 +841,7 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
 			boolean encounteredHigherVersion = false;
 			// iterate items until key's position is found
 			while(true){
-                if(delayForLinearizabilityTesting && Math.random() < 0.5) {
-                    Utils.randomDelay(delayForLinearizabilityTesting, 1);
-                }
+				Utils.randomDelay(delayForLinearizabilityTesting, 1);
 				prev = curr;
 				curr = get(prev, OFFSET_NEXT);	// index of next item in list
 				// if no item, done searching - add to end of list
@@ -892,14 +890,18 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
                         { // Update size bounds.
                             if (!sizeBounds.isFake && Math.abs(newDataIdx) > Math.abs(oldDataIdx)) {
                                 // cas happened.
-                                // We need synchronized access to prev.next, due to JavaMemoryModel.
-                                if (!encounteredHigherVersion && cas(prev, OFFSET_NEXT, curr, curr)) {
-                                    // prev still points to curr - we are certain that this is the highest version.
-                                    sizeBounds.finishInsert(newDataIdx < 0, oldDataIdx < 0);
-                                }else if(!encounteredHigherVersion){
-                                    System.out.println("failed to update size bounds - overwrite");
+                                if(encounteredHigherVersion) {
+                                    sizeBounds.undoPut(null == getData(orderIndex));
+                                }else {// We need synchronized access to prev.next, due to JavaMemoryModel.
+                                    if (cas(prev, OFFSET_NEXT, curr, curr)) {
+                                        // prev still points to curr - we are certain that this is the highest version.
+                                        sizeBounds.finishInsert(newDataIdx < 0, oldDataIdx < 0);
+                                    } else if (!encounteredHigherVersion) {
+                                        System.out.println("failed to update size bounds - overwrite");
+                                    }
                                 }
                             }
+
                         }
 						return;
 					}
@@ -933,12 +935,13 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
 					// We just added an element.
 
                     { // Update size bounds.
-                        if(!sizeBounds.isFake && !encounteredHigherVersion) {
-
-                            if ((curr == NONE || cmp > 0) || (cmp == 0 && cas(curr, OFFSET_DATA, oldDataIdx, oldDataIdx))) {
-                                // We need synchronized access to oldDataIdx, due to JavaMemoryModel.
-                                // The dataIdx of next did not change.
-                                sizeBounds.finishInsert(newDataIdx < 0, oldDataIdx < 0);
+                        if(!sizeBounds.isFake) {
+                            if (encounteredHigherVersion) {
+                                sizeBounds.undoPut(dataIsNull);
+                            } else if ((curr == NONE || cmp > 0) || (cmp == 0 && cas(curr, OFFSET_DATA, oldDataIdx, oldDataIdx))) {
+                                    // We need synchronized access to oldDataIdx, due to JavaMemoryModel.
+                                    // The dataIdx of next did not change.
+                                    sizeBounds.finishInsert(newDataIdx < 0, oldDataIdx < 0);
                             } else if (cmp == 0) {
                                 System.out.println("failed to update size bounds - new version");
                             }

@@ -22,7 +22,7 @@ import java.util.Random;
 
 
 public class KiwiLinearizabilityTest {
-    private static final int NUM_ITERATIONS = 500;
+    private static final int NUM_ITERATIONS = 100;
 
     @Test
     public void explicitTest1() throws IOException, InterruptedException {
