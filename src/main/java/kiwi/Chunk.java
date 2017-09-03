@@ -890,7 +890,7 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
 //                        System.out.format("replacing tid=%d\n", KiWi.threadId());
 
                         { // Update size bounds.
-                            if (Math.abs(newDataIdx) > Math.abs(oldDataIdx)) {
+                            if (!sizeBounds.isFake && Math.abs(newDataIdx) > Math.abs(oldDataIdx)) {
                                 // cas happened.
                                 // We need synchronized access to prev.next, due to JavaMemoryModel.
                                 if (!encounteredHigherVersion && cas(prev, OFFSET_NEXT, curr, curr)) {
@@ -933,7 +933,7 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
 					// We just added an element.
 
                     { // Update size bounds.
-                        if(!encounteredHigherVersion) {
+                        if(!sizeBounds.isFake && !encounteredHigherVersion) {
 
                             if ((curr == NONE || cmp > 0) || (cmp == 0 && cas(curr, OFFSET_DATA, oldDataIdx, oldDataIdx))) {
                                 // We need synchronized access to oldDataIdx, due to JavaMemoryModel.
