@@ -136,7 +136,6 @@ public class KiWi<K extends Comparable<? super K>, V> implements ChunkIterator<K
 
 
 				if (c.isFreezed()) {
-					c.printLinkedList();
 					// if succeeded to freeze item -- it is not accessible, need to reinsert it in rebalanced chunk
 					if (c.tryFreezeItem(oi)) {
 						// Undo speculative add/remove. Version was NONE, it wasn't seen by anyone.
