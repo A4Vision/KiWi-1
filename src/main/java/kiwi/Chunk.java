@@ -667,7 +667,7 @@ public abstract class Chunk<K extends Comparable<? super K>,V>
 				if (version == NONE)
 				{
 					// set version to FREEZE so put op knows to restart
-					// if succeded - item will not be in this chunk, we can continue to next item
+					// if succeeded - item will not be in this chunk, we can continue to next item
 					if ((cas(idx, OFFSET_VERSION, NONE, FREEZE_VERSION)) ||
 							(getVersion(idx) == FREEZE_VERSION))
 					{

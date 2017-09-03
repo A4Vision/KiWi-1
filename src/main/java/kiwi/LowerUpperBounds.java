@@ -89,4 +89,12 @@ public class LowerUpperBounds{
         if(isFake) return;
         upperBound.decrement();
     }
+
+    public void undoPut(boolean dataIsNull) {
+        if(dataIsNull){
+            undoAboutToRemove();
+        }else{
+            undoAboutToAdd();
+        }
+    }
 }

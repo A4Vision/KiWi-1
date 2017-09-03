@@ -54,9 +54,9 @@ public class TestKiWiNaive {
     }
 
     @Test
-    public void testSizeBounds(){
+    public void testSizeBoundsDuringRebalance(){
         KiWiMap map = new KiWiMap(false, true);
-        final int N = 200;
+        final int N = 5000;
         for(int i = 0; i < N; ++i){
             map.put(i, i);
             assertEquals(i + 1, map.sizeLowerBound());
