@@ -17,7 +17,7 @@ do
     do
         for mapNumber in 0 1 2 3
         do
-            export cmd="$PREFIX java -ea benchmarks.Main 2000000 $threadsNumber 1000000 $mapNumber $experimentIndex $experimentsCount 5 3"
+            export cmd="$PREFIX java -d64 -server -ea benchmarks.Main 2000000 $threadsNumber 1000000 $mapNumber $experimentIndex $experimentsCount 5 3"
             echo $cmd
             $cmd >> results.txt
             tail -n 4 results.txt
@@ -33,7 +33,7 @@ do
     do
         for mapNumber in 0 1
         do
-            export cmd="$PREFIX java -ea benchmarks.Main 2000000 $threadsNumber 1000000 $mapNumber $experimentIndex $experimentsCount 5 3"
+            export cmd="$PREFIX java -d64 -server -ea benchmarks.Main 2000000 $threadsNumber 1000000 $mapNumber $experimentIndex $experimentsCount 5 3"
             echo $cmd
             $cmd >> results.txt
             tail -n 4 results.txt

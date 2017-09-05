@@ -104,7 +104,7 @@ public class LockFreeKSTRQ<E extends Comparable<? super E>, V> implements Compos
     @Override
     public int getRange(V[] result, E[] resultKeys, boolean addKeys, E min, E max){
         assert(addKeys);
-        return subSet(resultKeys, (E)min,(E)max);
+        return subSet((E)min,(E)max).length;
     }
 
     private int sequentialSize(final Node node) {
@@ -473,7 +473,7 @@ public class LockFreeKSTRQ<E extends Comparable<? super E>, V> implements Compos
         }
     }
 
-    public final int subSet(Object[] result, final E lo, final E hi) {
+    public final Object[] subSet(final E lo, final E hi) {
         if (less(hi, lo)) {
             throw new IllegalArgumentException("inconsistent range");
         }
@@ -549,18 +549,15 @@ public class LockFreeKSTRQ<E extends Comparable<? super E>, V> implements Compos
                 if (!loop) break;
             }
 
-            int numVals = 0;
             // CASE: NO NODES WITH KEYS IN RANGE
             if (si > ei) {
-                //return new Object[0];
-                return 0;
+                return new Object[0];
             }
             // CASE: SINGLE NODE WITH KEYS IN RANGE
             if (si == ei) {
-                //final Object[] result = new Object[ej-sj+1];
-                System.arraycopy(snap.s[si].v, sj, result, 0, ej-sj+1);
-                numVals += ej-sj+1;
-                return numVals;
+                final Object[] result = new Object[ej-sj+1];
+                System.arraycopy(snap.s[si].k, sj, result, 0, ej-sj+1);
+                return result;
             }
             // CASE: MULTIPLE NODES WITH KEYS IN RANGE
             // get total number of keys in range [lo,hi]
@@ -568,24 +565,19 @@ public class LockFreeKSTRQ<E extends Comparable<? super E>, V> implements Compos
             for (int i=si;i<ei;i++) {
                 numKeys += snap.s[i].kcount;
             }
-
+            final Object[] result = new Object[numKeys];
             // save keys for first node
             int k = snap.s[si].kcount-sj;
-            System.arraycopy(snap.s[si].v, sj, result, 0, k);
-
-            numVals+=k;
-
+            System.arraycopy(snap.s[si].k, sj, result, 0, k);
             ++si;
             // save keys for all but the last node
             for (;si<ei;si++) {
-                System.arraycopy(snap.s[si].v, 0, result, k, snap.s[si].kcount);
-                numVals += snap.s[si].kcount;
+                System.arraycopy(snap.s[si].k, 0, result, k, snap.s[si].kcount);
                 k += snap.s[si].kcount;
             }
             // save keys for the last node
-            System.arraycopy(snap.s[ei].v, 0, result, k, ej+1);
-            numVals += ej+1;
-            return numVals;
+            System.arraycopy(snap.s[ei].k, 0, result, k, ej+1);
+            return result;
         }
     }
 

@@ -109,7 +109,7 @@ class MapsComparator {
         for(Thread t: threads){
             double beforeJoin = System.currentTimeMillis();
             t.join();
-            assert(System.currentTimeMillis() - beforeJoin < 5);
+            assert(System.currentTimeMillis() - beforeJoin < 200);
         }
         return new Throughput(totalOperationsAdder.floatValue() / (duration * MILLION),
                 totalItemsScanned.floatValue() / (duration * MILLION));
