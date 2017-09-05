@@ -144,14 +144,13 @@ class MapsComparator {
 
         void scan(int startKey){
             if (map instanceof KiWiMap) {
-                ((KiWiMap) map).getRange(tempArray, new Integer[0], false, startKey, startKey + SCAN_SIZE);
+                operationsPerformedCount += ((KiWiMap) map).getRange(tempArray, new Integer[0], false, startKey, startKey + SCAN_SIZE);
             }else if(map instanceof LockFreeKSTRQ){
-                ((LockFreeKSTRQ) map).getRange(new Integer[0], tempArray, true, startKey, startKey + SCAN_SIZE);
+                operationsPerformedCount += ((LockFreeKSTRQ) map).getRange(new Integer[0], tempArray, true, startKey, startKey + SCAN_SIZE);
             }else{
                 System.err.println(map);
                 assert(false);
             }
-            operationsPerformedCount += SCAN_SIZE;
         }
 
         boolean isScanThread(){
